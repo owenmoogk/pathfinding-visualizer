@@ -79,7 +79,7 @@ class Spot:
     def makePath(self):
         self.color = PURPLE
 
-    def draw(self, window):
+    def draw(self):
         pygame.draw.rect(screen, self.color, (self.x, self.y, gridSize, gridSize))
 
     def updateNeighbors(self, grid):
@@ -126,6 +126,9 @@ def algorithm(draw, grid, start, end):
     openSet.put((0, count, start))
     cameFrom = {}
     # "inf" is infinity
+    # gScore is the cost so far to reach the node
+    # fScore is the totals estimated cost to reach the final node
+    # 
     gScore = {spot: float("inf") for row in grid for spot in row}
     gScore[start] = 0
     fScore = {spot: float("inf") for row in grid for spot in row}
@@ -188,7 +191,7 @@ def draw(screen, grid):
     screen.fill(WHITE)
     for row in grid:
         for spot in row:
-            spot.draw(screen)
+            spot.draw()
     drawGrid(screen, grid)
     pygame.display.update()
 
@@ -198,7 +201,7 @@ def getClickedPosition(position):
     col = x // gridSize
     return(row, col)
 
-def main(win):
+def main(screen):
     grid = makeGrid()
     start = None
     end = None
@@ -238,7 +241,6 @@ def main(win):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and start and end:
-                    started = True
                     
                     # getting neighbors of elements
                     for row in grid:
