@@ -128,7 +128,6 @@ def algorithm(draw, grid, start, end):
     # "inf" is infinity
     # gScore is the cost so far to reach the node
     # fScore is the totals estimated cost to reach the final node
-    # 
     gScore = {spot: float("inf") for row in grid for spot in row}
     gScore[start] = 0
     fScore = {spot: float("inf") for row in grid for spot in row}
