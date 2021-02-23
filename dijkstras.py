@@ -7,7 +7,7 @@ clock = pygame.time.Clock()
 
 # display
 screen = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption('A* Pathfinding Algorithm')
+pygame.display.set_caption('Dijkstras Pathfinding Algorithm')
 
 #colors
 BLACK = (0,0,0)
@@ -111,7 +111,6 @@ def reconstructPath(cameFrom, current, draw, start, end):
             current.makeEnd()
         current = cameFrom[current]
         draw()
-    print(cameFrom)
 
 def algorithm(draw, grid, start, end):
 
