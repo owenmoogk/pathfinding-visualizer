@@ -205,12 +205,10 @@ def main(screen):
     start = None
     end = None
 
-    run = True
-
-    while run:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                pygame.quit()
 
             # left mouse
             if pygame.mouse.get_pressed()[0]:
@@ -261,9 +259,6 @@ def main(screen):
                     grid = makeGrid()
 
         draw(screen, grid)
-
-
-    pygame.quit()
 
 if __name__ == "__main__":
     main(screen)
