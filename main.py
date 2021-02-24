@@ -7,7 +7,7 @@ clock = pygame.time.Clock()
 
 # display
 screen = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption('A* Pathfinding Algorithm')
+pygame.display.set_caption('Pathfinding Algorithms')
 
 #colors
 BLACK = (0,0,0)
