@@ -99,7 +99,7 @@ class Spot:
     def __lt__(self, other):
         return(False)
 
-def hGreedy(spot1, spot2):
+def distance(spot1, spot2):
     x1 = spot1.x
     y1 = spot1.y
     x2 = spot2.x
@@ -167,7 +167,7 @@ def dijkstras(draw, grid, start, end):
 def greedyBestFirstSearch(draw, grid, start, end):
 
     heuristicGrid = [[float("inf") for i in range(gridDimensions)] for j in range(gridDimensions)]
-    heuristicGrid[start.row][start.col] = hGreedy(start, end)
+    heuristicGrid[start.row][start.col] = distance(start, end)
     cameFrom = {}
 
     # main algorithm loop
@@ -186,7 +186,7 @@ def greedyBestFirstSearch(draw, grid, start, end):
         for neighbor in currSpot.neighbors:
             if neighbor.isClosed():
                 continue
-            heuristicGrid[neighbor.row][neighbor.col] = hGreedy(neighbor, end)
+            heuristicGrid[neighbor.row][neighbor.col] = distance(neighbor, end)
             neighbor.makeOpen()
             cameFrom[neighbor] = currSpot
             if neighbor == end:
@@ -236,12 +236,6 @@ def astar(draw, grid, start, end):
 
         print(openSet.queue)
 
-        # ok..... so
-        # ugh
-        # fuck me
-        # ok
-        # so
-        # basically
         # the tiebreaker for the pq is how close it is to the end node. the closer the higher priority.
         # but, when we look at a node that is already open but we have found a better path to it, it is already in the pq.
         # since we cannot update the pq, we have to add a new element with the updated information.
@@ -250,10 +244,7 @@ def astar(draw, grid, start, end):
         # the opensethash variable will keep track of the open nodes, and once we have closed it it will be removed.
         # if we get the 'best' node from the pq, but it is not in the opensethash, we have already looked it with a better configuration
         # so, we just skip.
-        # like i said
-        # fuck me
         # PS -- i will admit this is 10% me being stupid, but 90% the PQ module being limited. I could use the heapq module, but...
-        # just shutup
 
         # getting current node, removing from openset
         current = openSet.get()[2]
