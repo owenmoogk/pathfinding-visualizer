@@ -3,7 +3,6 @@ from queue import PriorityQueue
 
 # config var
 WIDTH = 800
-clock = pygame.time.Clock()
 
 # display
 screen = pygame.display.set_mode((WIDTH, WIDTH))
@@ -25,7 +24,6 @@ font = pygame.font.SysFont("comicsans", 50)
 
 # settings
 gridSize = 16
-gameSpeed = 30
 gridDimensions = WIDTH // gridSize
 
 class Spot:
@@ -122,12 +120,6 @@ def getLowestHeuristic(hGrid):
     # only returns the first one, the others might be used earlier
     return(coords[0])
 
-# heuristic function
-def h(p1, p2):
-    x1, y1 = p1
-    x2, y2 = p2
-    return(abs(x1 - x2) + abs(y1 - y2))
-
 def reconstructPath(cameFrom, current, draw, start, end):
     # goes thru the found path and draws it all
     while current in cameFrom:
@@ -208,55 +200,99 @@ def greedyBestFirstSearch(draw, grid, start, end):
     return False
 
 def astar(draw, grid, start, end):
-    count = 0
+
+    # Heuristic Function
+    # NOTE: Must be smaller than or equal to the actual value, otherwise we will not find the shortest path.
+    def h(p1, p2):
+        x1, y1 = p1
+        x2, y2 = p2
+        return(abs(x1 - x2) + abs(y1 - y2))
+
     # priority queue just gets the minimum element from the list
     openSet = PriorityQueue()
-    # put = append
-    openSet.put((0, count, start))
+    openSet.put((0, 0, start))
+    
+    # used to backtrack at the end
     cameFrom = {}
-    # "inf" is infinity
+
     # gScore is the cost so far to reach the node
-    # fScore is the totals estimated cost to reach the final node
     gScore = {spot: float("inf") for row in grid for spot in row}
     gScore[start] = 0
+    
+    # fScore is the estimated cost to reach the final node
     fScore = {spot: float("inf") for row in grid for spot in row}
     fScore[start] = h(start.getPosition(), end.getPosition())
 
+    # is a hash of all the nodes in the openset
     openSetHash = {start}
 
     # main algorithm loop
     while not openSet.empty():
+
+        # pygame quit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        # getting node
-        current = openSet.get()[2]
-        openSetHash.remove(current)
+        print(openSet.queue)
 
-        # bam pancakes
+        # ok..... so
+        # ugh
+        # fuck me
+        # ok
+        # so
+        # basically
+        # the tiebreaker for the pq is how close it is to the end node. the closer the higher priority.
+        # but, when we look at a node that is already open but we have found a better path to it, it is already in the pq.
+        # since we cannot update the pq, we have to add a new element with the updated information.
+        # this can become an issue as there are now multiple elements in the pq referencing the same node.
+        # to combat this, when we remove the 'best' one, we will also remove it from the open set hash.
+        # the opensethash variable will keep track of the open nodes, and once we have closed it it will be removed.
+        # if we get the 'best' node from the pq, but it is not in the opensethash, we have already looked it with a better configuration
+        # so, we just skip.
+        # like i said
+        # fuck me
+        # PS -- i will admit this is 10% me being stupid, but 90% the PQ module being limited. I could use the heapq module, but...
+        # just shutup
+
+        # getting current node, removing from openset
+        current = openSet.get()[2]
+        try:
+            openSetHash.remove(current)
+        except:
+            continue
+        
+        # if completed
         if current == end:
             reconstructPath(cameFrom, end, draw, start, end)
             return True
 
+        # loop through the current nodes neighbors
         for neighbor in current.neighbors:
+
+            # length it took to reach this node
             tempGScore = gScore[current] + 1
 
+            # if this is the fastest way to reach this node:
             if tempGScore < gScore[neighbor]:
+
+                # update the backtracking
                 cameFrom[neighbor] = current
+
+                # update the scores
                 gScore[neighbor] = tempGScore
                 fScore[neighbor] = tempGScore + h(neighbor.getPosition(), end.getPosition())
-                # add into open set hash if not already there
-                if neighbor not in openSetHash:
-                    count += 1
-                    openSet.put((fScore[neighbor], count, neighbor))
-                    openSetHash.add(neighbor)
-                    neighbor.makeOpen()
 
-        draw()
+                # update the priority queues
+                openSet.put((fScore[neighbor], h(neighbor.getPosition(), end.getPosition()), neighbor))
+                openSetHash.add(neighbor)  # note that if it is already here it WILL NOT duplicate *uwu*
+                neighbor.makeOpen()
 
+        # finally close off this node
         if current != start:
             current.makeClosed()
+
+        draw()
 
     return False
 
