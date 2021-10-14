@@ -55,6 +55,9 @@ class Spot:
 
     def isPath(self):
         return(self.color == PURPLE)
+    
+    def isWeight(self):
+        return(self.color == GREY)
 
     def reset(self):
         self.color = WHITE
@@ -76,6 +79,9 @@ class Spot:
 
     def makePath(self):
         self.color = PURPLE
+
+    def makeWeight(self):
+        self.color = GREY
 
     def draw(self):
         pygame.draw.rect(screen, self.color, (self.x, self.y, gridSize, gridSize))
@@ -281,8 +287,6 @@ def dijkstras(draw, grid, start, end):
 
         draw()
 
-
-
 def astar(draw, grid, start, end):
 
     # Heuristic Function
@@ -433,6 +437,12 @@ def main(screen):
                 elif spot == end:
                     end = None
 
+            elif pygame.mouse.get_pressed()[1]:
+                clickPosition = pygame.mouse.get_pos()
+                row, col = getClickedPosition(clickPosition)
+                spot = grid[row][col]
+                spot.makeWeight()
+
             if event.type == pygame.KEYDOWN:
 
                 # clear the screen
@@ -448,11 +458,7 @@ def main(screen):
                         for row in grid:
                             for spot in row:
                                 spot.updateNeighbors(grid)
-                                if spot.isOpen():
-                                    spot.reset()
-                                elif spot.isClosed():
-                                    spot.reset()
-                                elif spot.isPath():
+                                if spot.isOpen() or spot.isClosed() or spot.isPath():
                                     spot.reset()
 
                     if event.key == pygame.K_a:
