@@ -2,8 +2,8 @@
 A python application built using pygame to visualize pathfinding algorithms.
 
 Controls:
-- D: Dijkstras
+- B: Breadth First Search
 - A: AStar
-- B: Greedy Best First Search
+- G: (Greedy) Best First Search
 - C: Clear board
 - Space: Go
