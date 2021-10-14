@@ -1,5 +1,5 @@
 import pygame, random
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 
 # config var
 WIDTH = 800
@@ -111,37 +111,42 @@ def reconstructPath(cameFrom, current, draw, start, end):
         start.makeStart()
         draw()
 
-def dijkstras(draw, grid, start, end):
+def breadthFirstSearch(draw, grid, start, end):
 
-    closedNodes = []
-    nextQueue = [(start)]
-    tempQueue = []
+    nextQueue = Queue()
+    nextQueue.put((start))
+    nextQueueHash = {start}
+
     cameFrom = {}
 
-    while True:
+    while not nextQueue.empty():
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        if len(nextQueue) == 0:
-            return False
+        currNode = nextQueue.get()
+        
+        for neighbor in currNode.neighbors:
 
-        for currNode in nextQueue:
-            for neighbor in currNode.neighbors:
-                if neighbor in closedNodes or neighbor in nextQueue or neighbor in tempQueue:
-                    continue
-                tempQueue.append(neighbor)
-                neighbor.makeOpen()
-                cameFrom[neighbor] = currNode
-                if neighbor == end:
-                    reconstructPath(cameFrom, end, draw, start, end)
-                    return True
-            if currNode != start:
-                currNode.makeClosed()
-            closedNodes.append(currNode)
-            draw()
-        nextQueue = tempQueue
-        tempQueue = []
+            if neighbor.isClosed() or neighbor in nextQueueHash:
+                continue
+
+            nextQueue.put(neighbor)
+            nextQueueHash.add(neighbor)
+            neighbor.makeOpen()
+            cameFrom[neighbor] = currNode
+
+            if neighbor == end:
+                reconstructPath(cameFrom, end, draw, start, end)
+                return True
+
+        if currNode != start:
+            currNode.makeClosed()
+
+        draw()
+
+    return False
 
 def bestFirstSearch(draw, grid, start, end):
 
@@ -376,7 +381,9 @@ def main(screen):
                     elif event.key == pygame.K_d:
                         dijkstras(lambda: draw(screen, grid), grid, start, end)
                     elif event.key == pygame.K_g:
-                        greedyBestFirstSearch(lambda: draw(screen, grid), grid, start, end)
+                        bestFirstSearch(lambda: draw(screen, grid), grid, start, end)
+                    elif event.key == pygame.K_b:
+                        breadthFirstSearch(lambda: draw(screen, grid), grid, start, end)
 
 
         draw(screen, grid)
