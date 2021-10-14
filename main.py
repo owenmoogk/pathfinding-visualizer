@@ -461,6 +461,14 @@ def main(screen):
 
                 # if it is a command to run an algorithm
                 elif start and end:
+
+                    # for those that cannot use weights, then we need to change them into barriers
+                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b:
+                        for row in grid:
+                            for spot in row:
+                                if spot.isWeight():
+                                    spot.makeBarrier()
+
                     # getting neighbors of elements
                     if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_d:
                         for row in grid:
