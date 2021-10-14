@@ -167,14 +167,15 @@ def bestFirstSearch(draw, grid, start, end):
         coords = []
         for rowIndex, row in enumerate(hGrid):
             for itemIndex, item in enumerate(row):
-                if item < lowestH:
+                if item <= lowestH and item != float('inf'):
                     lowestH = item
                     coords = [[rowIndex, itemIndex]]
-                elif item == lowestH:
-                    coords.append([rowIndex, itemIndex])
-            
+
         # only returns the first one, the others might be used earlier
-        return(coords[0])
+        if coords:
+            return(coords[0])
+        else:
+            return None
 
     def distance(spot1, spot2):
         x1 = spot1.x
@@ -196,12 +197,13 @@ def bestFirstSearch(draw, grid, start, end):
         # getting the lowest heuristic from my grid that is open
         lowestCoords = getLowestHeuristic(heuristicGrid)
 
+        if lowestCoords == None:
+            return
+
         # getting the current spot object from the grid
         currSpot = grid[lowestCoords[0]][lowestCoords[1]]
-
         # loops thru the neighbors of the current spot
         for neighbor in currSpot.neighbors:
-            if neighbor.isClosed():
             if neighbor.isClosed() or neighbor.isStart():
                 continue
             heuristicGrid[neighbor.row][neighbor.col] = distance(neighbor, end)
