@@ -219,7 +219,69 @@ def bestFirstSearch(draw, grid, start, end):
 
         draw()
 
-    return False
+def dijkstras(draw, grid, start, end):
+
+    # dijkstras works by exploring the nodes with the smallest cost first.
+    # does NOT use heuristics, getDistance function is just a tiebreaker for the pq
+
+    # distances keeps track of the distance from the start node
+    # previous keeps track of the node that another node came from ¯\_(ツ)_/¯
+    distances = {}
+    previous = {}
+
+    # NOTE: only for tiebreaking in pq. makes it look prettier 
+    def getDistance(spot1, spot2):
+        x1 = spot1.x
+        y1 = spot1.y
+        x2 = spot2.x
+        y2 = spot2.y
+        return(abs(x1 - x2) + abs(y1 - y2))
+
+    # set all the distances to infinity, and previous to none
+    for row in grid:
+        for node in row:
+            distances[node] = float('inf')
+            previous[node] = None
+    
+    priority = PriorityQueue()
+    priority.put((0, 0, start))
+
+    while not priority.empty():
+
+        # get the node closest to the start, tiebreaker goes to one closest to the end
+        distance, ignore, currentNode = priority.get()
+
+        # hip hip hoorah!
+        if currentNode == end:
+            reconstructPath(previous, end, draw, start, end)
+            return True
+        
+        # loop thru neighbors
+        for neighbor in currentNode.neighbors:
+
+            # we don't want to look at neighbors that are already dealt with
+            if not neighbor.isClosed() and not neighbor.isStart():
+
+                # visual thing
+                neighbor.makeOpen()
+
+                # get the old and new costs, then compare
+                oldCost = distances[neighbor]
+                newCost = distance + 1
+
+                # if we have found a shorter way to reach the open node, then use that.
+                if newCost < oldCost:
+                    # the second value in the tuple is a tiebreaker
+                    priority.put((newCost, getDistance(neighbor, end), neighbor))
+                    distances[neighbor] = newCost
+                    previous[neighbor] = currentNode
+
+        if currentNode != start:
+            currentNode.makeClosed()
+
+        draw()
+
+
 
 def astar(draw, grid, start, end):
 
@@ -382,7 +444,7 @@ def main(screen):
                 # if it is a command to run an algorithm
                 elif start and end:
                     # getting neighbors of elements
-                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b:
+                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_d:
                         for row in grid:
                             for spot in row:
                                 spot.updateNeighbors(grid)
@@ -399,8 +461,8 @@ def main(screen):
                         breadthFirstSearch(lambda: draw(screen, grid), grid, start, end)
                     elif event.key == pygame.K_g:
                         bestFirstSearch(lambda: draw(screen, grid), grid, start, end)
-                    # elif event.key == pygame.K_b:
-                    #     breadthFirstSearch(lambda: draw(screen, grid), grid, start, end)
+                    elif event.key == pygame.K_d:
+                        dijkstras(lambda: draw(screen, grid), grid, start, end)
 
 
         draw(screen, grid)
