@@ -25,7 +25,7 @@ font = pygame.font.SysFont("comicsans", 50)
 # settings
 gridSize = 16
 gridDimensions = WIDTH // gridSize
-weightValue = 10
+weightValue = 15
 
 class Spot:
     def __init__(self, row, col):
@@ -356,7 +356,10 @@ def astar(draw, grid, start, end):
         for neighbor in current.neighbors:
 
             # length it took to reach this node
-            tempGScore = gScore[current] + 1
+            if neighbor.isWeight():
+                tempGScore = gScore[current] + weightValue
+            else:
+                tempGScore = gScore[current] + 1
 
             # if this is the fastest way to reach this node:
             if tempGScore < gScore[neighbor]:
@@ -371,10 +374,11 @@ def astar(draw, grid, start, end):
                 # update the priority queues
                 openSet.put((fScore[neighbor], h(neighbor.getPosition(), end.getPosition()), neighbor))
                 openSetHash.add(neighbor)  # note that if it is already here it WILL NOT duplicate *uwu*
-                neighbor.makeOpen()
+                if not neighbor.isWeight():
+                    neighbor.makeOpen()
 
         # finally close off this node
-        if current != start:
+        if current != start and not current.isWeight():
             current.makeClosed()
 
         draw()
@@ -463,7 +467,7 @@ def main(screen):
                 elif start and end:
 
                     # for those that cannot use weights, then we need to change them into barriers
-                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b:
+                    if event.key == pygame.K_g or event.key == pygame.K_b:
                         for row in grid:
                             for spot in row:
                                 if spot.isWeight():
