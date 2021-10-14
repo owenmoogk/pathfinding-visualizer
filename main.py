@@ -113,34 +113,46 @@ def reconstructPath(cameFrom, current, draw, start, end):
 
 def breadthFirstSearch(draw, grid, start, end):
 
+    # All 'open' nodes will be stored in a queue
     nextQueue = Queue()
     nextQueue.put((start))
     nextQueueHash = {start}
 
+    # Dictionary to keep track of paths
     cameFrom = {}
 
+    # As long as the nextqueue has elements to pursue, we will do so.
     while not nextQueue.empty():
         
+        # pygame x button
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
 
+        # get the first node in the queue
         currNode = nextQueue.get()
         
+        # get its neighbors
         for neighbor in currNode.neighbors:
 
+            # we dont want to pursue neighbors that are closed or that are already in the queue.
             if neighbor.isClosed() or neighbor in nextQueueHash:
                 continue
 
+            # put the neighbor in the queue, and add it to the hash. It is now open (open is just a visualization thing in this algo.)
             nextQueue.put(neighbor)
             nextQueueHash.add(neighbor)
             neighbor.makeOpen()
+
+            # update the backtracking
             cameFrom[neighbor] = currNode
 
+            # mommy we did it!
             if neighbor == end:
                 reconstructPath(cameFrom, end, draw, start, end)
                 return True
 
+        # close it off
         if currNode != start:
             currNode.makeClosed()
 
@@ -190,6 +202,7 @@ def bestFirstSearch(draw, grid, start, end):
         # loops thru the neighbors of the current spot
         for neighbor in currSpot.neighbors:
             if neighbor.isClosed():
+            if neighbor.isClosed() or neighbor.isStart():
                 continue
             heuristicGrid[neighbor.row][neighbor.col] = distance(neighbor, end)
             neighbor.makeOpen()
@@ -198,7 +211,9 @@ def bestFirstSearch(draw, grid, start, end):
                 reconstructPath(cameFrom, end, draw, start, end)
                 return True
         heuristicGrid[lowestCoords[0]][lowestCoords[1]] = float("inf")
-        currSpot.makeClosed()
+        
+        if currSpot != start:
+            currSpot.makeClosed()
 
         draw()
 
@@ -365,7 +380,7 @@ def main(screen):
                 # if it is a command to run an algorithm
                 elif start and end:
                     # getting neighbors of elements
-                    if event.key == pygame.K_a or event.key == pygame.K_d or event.key == pygame.K_g or event.key == pygame.K_b:
+                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b:
                         for row in grid:
                             for spot in row:
                                 spot.updateNeighbors(grid)
@@ -378,12 +393,12 @@ def main(screen):
 
                     if event.key == pygame.K_a:
                         astar(lambda: draw(screen, grid), grid, start, end)
-                    elif event.key == pygame.K_d:
-                        dijkstras(lambda: draw(screen, grid), grid, start, end)
-                    elif event.key == pygame.K_g:
-                        bestFirstSearch(lambda: draw(screen, grid), grid, start, end)
                     elif event.key == pygame.K_b:
                         breadthFirstSearch(lambda: draw(screen, grid), grid, start, end)
+                    elif event.key == pygame.K_g:
+                        bestFirstSearch(lambda: draw(screen, grid), grid, start, end)
+                    # elif event.key == pygame.K_b:
+                    #     breadthFirstSearch(lambda: draw(screen, grid), grid, start, end)
 
 
         draw(screen, grid)
