@@ -99,27 +99,6 @@ class Spot:
     def __lt__(self, other):
         return(False)
 
-def distance(spot1, spot2):
-    x1 = spot1.x
-    y1 = spot1.y
-    x2 = spot2.x
-    y2 = spot2.y
-    return(abs(x1 - x2) + abs(y1 - y2))
-
-def getLowestHeuristic(hGrid):
-    lowestH = float("inf")
-    coords = []
-    for rowIndex, row in enumerate(hGrid):
-        for itemIndex, item in enumerate(row):
-            if item < lowestH:
-                lowestH = item
-                coords = [[rowIndex, itemIndex]]
-            elif item == lowestH:
-                coords.append([rowIndex, itemIndex])
-        
-    # only returns the first one, the others might be used earlier
-    return(coords[0])
-
 def reconstructPath(cameFrom, current, draw, start, end):
     # goes thru the found path and draws it all
     while current in cameFrom:
@@ -164,7 +143,28 @@ def dijkstras(draw, grid, start, end):
         nextQueue = tempQueue
         tempQueue = []
 
-def greedyBestFirstSearch(draw, grid, start, end):
+def bestFirstSearch(draw, grid, start, end):
+
+    def getLowestHeuristic(hGrid):
+        lowestH = float("inf")
+        coords = []
+        for rowIndex, row in enumerate(hGrid):
+            for itemIndex, item in enumerate(row):
+                if item < lowestH:
+                    lowestH = item
+                    coords = [[rowIndex, itemIndex]]
+                elif item == lowestH:
+                    coords.append([rowIndex, itemIndex])
+            
+        # only returns the first one, the others might be used earlier
+        return(coords[0])
+
+    def distance(spot1, spot2):
+        x1 = spot1.x
+        y1 = spot1.y
+        x2 = spot2.x
+        y2 = spot2.y
+        return(abs(x1 - x2) + abs(y1 - y2))
 
     heuristicGrid = [[float("inf") for i in range(gridDimensions)] for j in range(gridDimensions)]
     heuristicGrid[start.row][start.col] = distance(start, end)
@@ -233,8 +233,6 @@ def astar(draw, grid, start, end):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-
-        print(openSet.queue)
 
         # the tiebreaker for the pq is how close it is to the end node. the closer the higher priority.
         # but, when we look at a node that is already open but we have found a better path to it, it is already in the pq.
@@ -362,7 +360,7 @@ def main(screen):
                 # if it is a command to run an algorithm
                 elif start and end:
                     # getting neighbors of elements
-                    if event.key == pygame.K_a or event.key == pygame.K_d or event.key == pygame.K_g:
+                    if event.key == pygame.K_a or event.key == pygame.K_d or event.key == pygame.K_g or event.key == pygame.K_b:
                         for row in grid:
                             for spot in row:
                                 spot.updateNeighbors(grid)
