@@ -25,6 +25,7 @@ font = pygame.font.SysFont("comicsans", 50)
 # settings
 gridSize = 16
 gridDimensions = WIDTH // gridSize
+weightValue = 10
 
 class Spot:
     def __init__(self, row, col):
@@ -108,7 +109,8 @@ class Spot:
 def reconstructPath(cameFrom, current, draw, start, end):
     # goes thru the found path and draws it all
     while current in cameFrom:
-        current.makePath()
+        if not current.isWeight():
+            current.makePath()
         if current == start:
             current.makeStart()
         elif current == end:
@@ -234,6 +236,7 @@ def dijkstras(draw, grid, start, end):
     # previous keeps track of the node that another node came from ¯\_(ツ)_/¯
     distances = {}
     previous = {}
+    closed = set()
 
     # NOTE: only for tiebreaking in pq. makes it look prettier 
     def getDistance(spot1, spot2):
@@ -266,14 +269,18 @@ def dijkstras(draw, grid, start, end):
         for neighbor in currentNode.neighbors:
 
             # we don't want to look at neighbors that are already dealt with
-            if not neighbor.isClosed() and not neighbor.isStart():
+            if neighbor not in closed and not neighbor.isStart():
 
                 # visual thing
-                neighbor.makeOpen()
+                if not neighbor.isWeight():
+                    neighbor.makeOpen()
 
                 # get the old and new costs, then compare
                 oldCost = distances[neighbor]
-                newCost = distance + 1
+                if neighbor.isWeight():
+                    newCost = distance + weightValue
+                else:
+                    newCost = distance + 1
 
                 # if we have found a shorter way to reach the open node, then use that.
                 if newCost < oldCost:
@@ -282,8 +289,9 @@ def dijkstras(draw, grid, start, end):
                     distances[neighbor] = newCost
                     previous[neighbor] = currentNode
 
-        if currentNode != start:
+        if currentNode != start and not currentNode.isWeight():
             currentNode.makeClosed()
+        closed.add(currentNode)
 
         draw()
 
