@@ -109,14 +109,10 @@ class Spot:
 def reconstructPath(cameFrom, current, draw, start, end):
     # goes thru the found path and draws it all
     while current in cameFrom:
-        if not current.isWeight():
+        end.makeEnd()
+        if not current.isWeight() and current != start and current != end:
             current.makePath()
-        if current == start:
-            current.makeStart()
-        elif current == end:
-            current.makeEnd()
         current = cameFrom[current]
-        start.makeStart()
         draw()
 
 def breadthFirstSearch(draw, grid, start, end):
