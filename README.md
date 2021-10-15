@@ -2,10 +2,11 @@
 A python application built using pygame to visualize pathfinding algorithms.
 
 Algorithms:
-- B: Breadth First Search
 - A: AStar
-- G: (Greedy) Best First Search
 - D: Dijkstras
+- G: (Greedy) Best First Search
+- B: Breadth First Search
+- P: Depth First Search
 
 - C: Clear board
 - LeftClick: Place(start, end, barrier)

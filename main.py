@@ -1,5 +1,5 @@
 import pygame, random
-from queue import PriorityQueue, Queue
+from queue import PriorityQueue, Queue, LifoQueue
 
 # config var
 WIDTH = 800
@@ -108,8 +108,8 @@ class Spot:
 
 def reconstructPath(cameFrom, current, draw, start, end):
     # goes thru the found path and draws it all
+    end.makeEnd()
     while current in cameFrom:
-        end.makeEnd()
         if not current.isWeight() and current != start and current != end:
             current.makePath()
         current = cameFrom[current]
@@ -199,8 +199,6 @@ def bestFirstSearch(draw, grid, start, end):
 
         # getting the lowest heuristic from my grid that is open
         lowestCoords = getLowestHeuristic(heuristicGrid)
-        for row in heuristicGrid:
-            print(row)
 
         if lowestCoords == None:
             return
@@ -457,6 +455,37 @@ def snake(draw, grid, start, end):
 
     return False
 
+def depthFirstSearch(draw, grid, start, end):
+    
+    stack = LifoQueue()
+    stack.put(start)
+
+    cameFrom = {}
+    closed = set()
+
+    while not stack.empty():
+        
+        currentNode = stack.get()
+
+        if currentNode == end:
+            reconstructPath(cameFrom, end, draw, start, end)
+            return
+
+        if currentNode in closed:
+            continue
+
+        closed.add(currentNode)
+        if currentNode != start:
+            currentNode.makeClosed()
+
+        for neighbor in currentNode.neighbors:
+            if neighbor in closed:
+                continue
+            cameFrom[neighbor] = currentNode
+            stack.put(neighbor)
+
+        draw()
+
 def makeGrid():
     grid = []
     for i in range(gridDimensions):
@@ -539,14 +568,14 @@ def main(screen):
                 elif start and end:
 
                     # for those that cannot use weights, then we need to change them into barriers
-                    if event.key == pygame.K_b or event.key == pygame.K_s:
+                    if event.key == pygame.K_b or event.key == pygame.K_s or event.key == pygame.K_p:
                         for row in grid:
                             for spot in row:
                                 if spot.isWeight():
                                     spot.makeBarrier()
 
                     # getting neighbors of elements
-                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_d or event.key == pygame.K_s:
+                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_d or event.key == pygame.K_s or event.key == pygame.K_p:
                         for row in grid:
                             for spot in row:
                                 spot.updateNeighbors(grid)
@@ -563,6 +592,8 @@ def main(screen):
                         dijkstras(lambda: draw(screen, grid), grid, start, end)
                     elif event.key == pygame.K_s:
                         snake(lambda: draw(screen, grid), grid, start, end)
+                    elif event.key == pygame.K_p:
+                        depthFirstSearch(lambda: draw(screen, grid), grid, start, end)
 
 
         draw(screen, grid)
