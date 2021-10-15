@@ -1,14 +1,17 @@
 # pathfinding-visualizer
 A python application built using pygame to visualize pathfinding algorithms.
 
-Algorithms:
-- A: AStar
-- D: Dijkstras
-- G: Best First Search
-- S: Greedy Best First (Snake)
-- B: Breadth First Search
-- P: Depth First Search
+**Algorithms**:
+- Weighted
+  - A: AStar
+  - D: Dijkstras
+  - G: Best First Search
+- Unweighted
+  - S: Greedy Best First (Snake)
+  - B: Breadth First Search
+  - P: Depth First Search
 
+**Controls**:
 - C: Clear board
 - LeftClick: Place(start, end, barrier)
 - RightClick: Remove
