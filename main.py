@@ -385,6 +385,74 @@ def astar(draw, grid, start, end):
 
     return False
 
+def snake(draw, grid, start, end):
+
+    # So I made this one up, think of it like a *very* greedy best first search
+    # I called it snake because it pathfinds like a snake, it has a head that will pursue the best node adjacent to it
+    # It will only look at other nodes that are not next to it's head if the head has not more options.ss
+    # This is slow, but is more greedy than best first search and can at times be more optimized.
+
+    def h(p1, p2):
+        x1, y1 = p1
+        x2, y2 = p2
+        return(abs(x1 - x2) + abs(y1 - y2))
+
+    # priority queue just gets the most recent open node
+    openSet = PriorityQueue()
+    # openset is orginized by, recent, distance
+    openSet.put((0, 0, start))
+    
+    # used to backtrack at the end
+    cameFrom = {}
+    closed = set()
+
+    # is a hash of all the nodes in the openset
+    openSetHash = {start}
+
+    count = 0
+
+    # main algorithm loop
+    while not openSet.empty():
+
+        count += 1
+
+        # pygame quit
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = openSet.get()[2]
+        try:
+            openSetHash.remove(current)
+        except:
+            continue
+
+        # loop through the current nodes neighbors
+        for neighbor in current.neighbors:
+            
+            if neighbor in closed:
+                continue
+
+            # update the backtracking
+            cameFrom[neighbor] = current
+
+            if neighbor == end:
+                reconstructPath(cameFrom, end, draw, start, end)
+                return True
+
+            # update the priority queues
+            openSet.put((-count, h(neighbor.getPosition(), end.getPosition()), neighbor))
+            openSetHash.add(neighbor)  # note that if it is already here it WILL NOT duplicate
+
+        # finally close off this node
+        if current != start and not current.isWeight():
+            current.makeClosed()
+        closed.add(current)
+
+        draw()
+
+    return False
+
 def makeGrid():
     grid = []
     for i in range(gridDimensions):
@@ -467,14 +535,14 @@ def main(screen):
                 elif start and end:
 
                     # for those that cannot use weights, then we need to change them into barriers
-                    if event.key == pygame.K_g or event.key == pygame.K_b:
+                    if event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_s:
                         for row in grid:
                             for spot in row:
                                 if spot.isWeight():
                                     spot.makeBarrier()
 
                     # getting neighbors of elements
-                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_d:
+                    if event.key == pygame.K_a or event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_d or event.key == pygame.K_s:
                         for row in grid:
                             for spot in row:
                                 spot.updateNeighbors(grid)
@@ -489,6 +557,8 @@ def main(screen):
                         bestFirstSearch(lambda: draw(screen, grid), grid, start, end)
                     elif event.key == pygame.K_d:
                         dijkstras(lambda: draw(screen, grid), grid, start, end)
+                    elif event.key == pygame.K_s:
+                        snake(lambda: draw(screen, grid), grid, start, end)
 
 
         draw(screen, grid)
