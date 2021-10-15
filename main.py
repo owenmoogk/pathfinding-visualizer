@@ -181,16 +181,15 @@ def bestFirstSearch(draw, grid, start, end):
         else:
             return None
 
-    def distance(spot1, spot2):
-        x1 = spot1.x
-        y1 = spot1.y
-        x2 = spot2.x
-        y2 = spot2.y
+    def distance(p1, p2):
+        x1, y1 = p1
+        x2, y2 = p2
         return(abs(x1 - x2) + abs(y1 - y2))
 
     heuristicGrid = [[float("inf") for i in range(gridDimensions)] for j in range(gridDimensions)]
-    heuristicGrid[start.row][start.col] = distance(start, end)
+    heuristicGrid[start.row][start.col] = distance(start.getPosition(), end.getPosition())
     cameFrom = {}
+    closed = set()
 
     # main algorithm loop
     while True:
@@ -200,6 +199,8 @@ def bestFirstSearch(draw, grid, start, end):
 
         # getting the lowest heuristic from my grid that is open
         lowestCoords = getLowestHeuristic(heuristicGrid)
+        for row in heuristicGrid:
+            print(row)
 
         if lowestCoords == None:
             return
@@ -208,18 +209,25 @@ def bestFirstSearch(draw, grid, start, end):
         currSpot = grid[lowestCoords[0]][lowestCoords[1]]
         # loops thru the neighbors of the current spot
         for neighbor in currSpot.neighbors:
-            if neighbor.isClosed() or neighbor.isStart():
+            if neighbor in closed or neighbor.isStart():
                 continue
-            heuristicGrid[neighbor.row][neighbor.col] = distance(neighbor, end)
-            neighbor.makeOpen()
+
+            if neighbor.isWeight():
+                heuristicGrid[neighbor.row][neighbor.col] = distance(neighbor.getPosition(), end.getPosition())+weightValue
+            else:
+                heuristicGrid[neighbor.row][neighbor.col] = distance(neighbor.getPosition(), end.getPosition())
+            
+            if not neighbor.isWeight():
+                neighbor.makeOpen()
             cameFrom[neighbor] = currSpot
             if neighbor == end:
                 reconstructPath(cameFrom, end, draw, start, end)
                 return True
         heuristicGrid[lowestCoords[0]][lowestCoords[1]] = float("inf")
         
-        if currSpot != start:
+        if currSpot != start and not currSpot.isWeight():
             currSpot.makeClosed()
+        closed.add(currSpot)
 
         draw()
 
@@ -531,7 +539,7 @@ def main(screen):
                 elif start and end:
 
                     # for those that cannot use weights, then we need to change them into barriers
-                    if event.key == pygame.K_g or event.key == pygame.K_b or event.key == pygame.K_s:
+                    if event.key == pygame.K_b or event.key == pygame.K_s:
                         for row in grid:
                             for spot in row:
                                 if spot.isWeight():
