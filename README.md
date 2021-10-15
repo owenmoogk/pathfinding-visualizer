@@ -15,5 +15,5 @@ A python application built using pygame to visualize pathfinding algorithms.
 - C: Clear board
 - LeftClick: Place(start, end, barrier)
 - RightClick: Remove
-- Middle Click: Add weight(sometimes may be cleared if the algorithm doesn't support it, such as Breadth First Search)
+- Middle Click: Add weight (they will be converted into barriers when using unweighted algorithms)
 - Space: Go
