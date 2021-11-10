@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://src/styles.css"],"names":[],"mappings":"AAAA,KACI,QACJ,CAOA,WAJI,UAAW,CACX,QAOJ,CAJA,KAGI,YACJ","file":"main.5642638e.chunk.css","sourcesContent":["body{\r\n    margin: 0;\r\n}\r\n\r\n#grid{\r\n    width: 100%;\r\n    margin: 0;\r\n}\r\n\r\n.row{\r\n    width: 100%;\r\n    margin: 0;\r\n    display: flex;\r\n}"]}
