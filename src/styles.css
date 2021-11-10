@@ -1,5 +1,6 @@
 body{
     margin: 0;
+    overflow: hidden;
 }
 
 #grid{
@@ -11,4 +12,8 @@ body{
     width: 100%;
     margin: 0;
     display: flex;
+}
+
+.barrier{
+    background-color: black;
 }
