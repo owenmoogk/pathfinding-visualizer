@@ -1,25 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react'
+import Box from './Box.js'
+import './styles.css'
 
-function App() {
+
+export default function App() {
+
+  var boxSize = 20
+
+  window.addEventListener('contextmenu', e => e.preventDefault())
+
+  window.addEventListener('mousemove', (e) => {
+    if (window.event.buttons != 0) {
+      var col = Math.floor(e.clientX / boxSize)
+      var row = Math.floor(e.clientY / boxSize)
+      var box = document.getElementById('row' + row + 'col' + col)
+
+      if (window.event.buttons == 1){
+        box.style.backgroundColor = 'purple'
+      }
+      if (window.event.buttons == 2){
+        box.style.backgroundColor = 'pink'
+      }
+    }
+
+  })
+
+  var boxSize = boxSize
+
+  var width = window.innerWidth / boxSize
+  var height = window.innerHeight / boxSize
+
+  var grid = []
+  for (let row = 0; row < height; row++) {
+    grid.push([])
+    for (let col = 0; col < width; col++) {
+      grid[row].push(<Box row={row} col={col} boxSize={boxSize} />)
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{userSelect: 'none'}}>
+      <div id='grid'>
+        {grid.map((row) => {
+          return (
+            <div className='row' id={row}>
+              {row.map((element) => {
+                return (element)
+              })}
+            </div>
+          )
+        })}
+      </div>
     </div>
   );
 }
-
-export default App;
