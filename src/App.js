@@ -1,8 +1,82 @@
+import PriorityQueue from 'js-priority-queue'
 import Box from './Box.js'
 import './styles.css'
 
-
 export default function App() {
+
+  function getCoords(element){
+    var row = element.getAttribute('row')
+    var col = element.getAttribute('col')
+    return([row, col])
+  }
+
+  function getElement(coords){
+    var [row, col] = coords
+    return(document.getElementById('row'+row+'col'+col))
+  }
+  
+  function getNeighbors(element){
+    var [row, col] = getCoords(element)
+    var elements =  []
+    elements.push(getElement([row+1, col]))
+    elements.push(getElement([row-1, col]))
+    elements.push(getElement([row, col+1]))
+    elements.push(getElement([row, col-1]))
+    console.log(elements)
+    elements = elements.filter((a) =>  a)
+    console.log(elements)
+    return(elements)
+  }
+
+  function depthFirstSearch(){
+
+    var start = document.getElementsByClassName('start')[0]
+    var end = document.getElementsByClassName('end')[0]
+
+    var lifo = require('stack-lifo')
+    var stack = new lifo()
+    stack.push(start)
+    
+    var cameFrom = {}
+    var closed = new Set()
+    
+    while (stack.size() !== 0){
+
+      var currentNode = stack.pop()
+
+      if (currentNode === end){
+        // reconstruct path
+        return
+      }
+
+      if (closed.has(currentNode)){
+        continue
+      }
+      
+      closed.add(currentNode)
+
+      if (currentNode !== start){
+        currentNode.classList = 'closed'
+      }
+
+      var neighbors = getNeighbors(currentNode)
+      for (let i = 0; i < neighbors.length; i++){
+        var neighbor = neighbors[i]
+        if (neighbor.classList.contains('closed')){
+          continue
+        }
+        cameFrom[neighbor] = currentNode
+        stack.push(neighbor)
+      }
+    }
+  }
+  
+  // var queue = new PriorityQueue()
+  // queue.queue('owen')
+  // console.log(queue.length)
+  // console.log(queue.peek())
+  // console.log(queue.dequeue())
+  // console.log(queue.peek())
 
   var boxSize = 20
   var lastClickedCoords = null
@@ -77,6 +151,9 @@ export default function App() {
   window.addEventListener('mousemove', (e) => paint(e))
   window.addEventListener('mousedown', (e) => paint(e, true))
 
+  // buttons to activate it
+
+
   var width = window.innerWidth / boxSize
   var height = window.innerHeight / boxSize
 
@@ -101,6 +178,10 @@ export default function App() {
           )
         })}
       </div>
+
+      <button style={{position: 'absolute', bottom: "10px", right: '10px'}} onClick={() => depthFirstSearch()}>
+        go go power rangers
+      </button>
     </div>
   );
 }

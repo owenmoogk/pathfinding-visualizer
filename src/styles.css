@@ -29,3 +29,11 @@ body{
 .path{
     background-color: purple;
 }
+
+.closed{
+    background-color: red;
+}
+
+.open{
+    background-color: lightgreen;
+}
