@@ -17,3 +17,15 @@ body{
 .barrier{
     background-color: black;
 }
+
+.start{
+    background-color: orange;
+}
+
+.end{
+    background-color: teal;
+}
+
+.path{
+    background-color: purple;
+}

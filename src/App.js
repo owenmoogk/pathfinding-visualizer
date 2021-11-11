@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import Box from './Box.js'
 import './styles.css'
 
@@ -8,27 +7,38 @@ export default function App() {
   var boxSize = 20
   var lastClickedCoords = null
 
-  // right clicking does not pull up context menu
-  window.addEventListener('contextmenu', e => e.preventDefault())
+  // click override is basically just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
+  function paint(e, clickOverride=false) {
 
-  // when the mouse moves, check if any buttons are pressed, if so react
-  window.addEventListener('mousemove', (e) => {
     var col = Math.floor(e.clientX / boxSize)
     var row = Math.floor(e.clientY / boxSize)
-    var box = document.getElementById('row' + row + 'col' + col)
 
-    // paint the boxes when clicked, including the ones inbetween cuz it doesnt fire enough
-    if (window.event.buttons != 0) {
+    if (window.event.buttons !== 0 || clickOverride) {
 
-      if (!lastClickedCoords){
+      // check to see if start and end exist, and if not and left clicking place them
+      if (document.getElementsByClassName('start').length === 0 && (window.event.buttons === 1 || clickOverride)) {
+        document.getElementById('row' + row + 'col' + col).classList.add('start')
+        return
+      }
+      if (document.getElementsByClassName('end').length === 0 && (window.event.buttons === 1 || clickOverride)) {
+        var endNode = document.getElementById('row' + row + 'col' + col)
+        if (endNode.classList.contains('start')) {
+          return
+        }
+        endNode.classList.add('end')
+        return
+      }
+
+      // paint the boxes when clicked, including the ones inbetween cuz it doesnt fire enough
+      if (!lastClickedCoords) {
         var currentRow = row
         var currentCol = col
       }
-      else{
-        var currentRow = lastClickedCoords[0]
-        var currentCol = lastClickedCoords[1]
+      else {
+        currentRow = lastClickedCoords[0]
+        currentCol = lastClickedCoords[1]
       }
-      
+
       do {
         if (row > currentRow) {
           currentRow += 1
@@ -43,21 +53,29 @@ export default function App() {
           currentCol -= 1
         }
 
-        if (window.event.buttons == 1){
-          document.getElementById('row' + currentRow + 'col' + currentCol).classList.add('barrier')
+        if (window.event.buttons === 1) {
+          var currBox = document.getElementById('row' + currentRow + 'col' + currentCol)
+          if (!(currBox.classList.contains('start') || currBox.classList.contains('end'))){
+            currBox.classList.add('barrier')
+          }
         }
-        else if (window.event.buttons == 2){
-          document.getElementById('row' + currentRow + 'col' + currentCol).classList.remove('barrier')
+        else if (window.event.buttons === 2) {
+          document.getElementById('row' + currentRow + 'col' + currentCol).className = ''
         }
-      } while (currentRow != row || currentCol != col);
+      } while (currentRow !== row || currentCol !== col);
       lastClickedCoords = [row, col]
     }
     else {
       lastClickedCoords = null
     }
-  })
+  }
 
-  var boxSize = boxSize
+  // right clicking does not pull up context menu
+  window.addEventListener('contextmenu', e => e.preventDefault())
+
+  // when the mouse moves, check if any buttons are pressed, if so react
+  window.addEventListener('mousemove', (e) => paint(e))
+  window.addEventListener('mousedown', (e) => paint(e, true))
 
   var width = window.innerWidth / boxSize
   var height = window.innerHeight / boxSize
