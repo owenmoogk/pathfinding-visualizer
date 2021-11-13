@@ -2,9 +2,14 @@ import PriorityQueue from 'js-priority-queue'
 import Box from './Box.js'
 import './styles.css'
 import Queue from './Queue'
+import { useState } from 'react'
 
 export default function App() {
 
+  // timing for visualizations
+  var interval = undefined;
+
+  // getting grid coords from cell element
   function getCoords(element) {
     var row = element.getAttribute('row')
     var col = element.getAttribute('col')
@@ -13,12 +18,18 @@ export default function App() {
     return ([row, col])
   }
 
+  // getting cell element from grid coords
   function getElement(coords) {
     var [row, col] = coords
     return (document.getElementById('row' + row + 'col' + col))
   }
 
+  // clears the used squares before running, checks start and end, passed the function to call.
   function startAlgorithm(algorithm) {
+
+    if (interval){
+      return
+    }
 
     function blankElements(elements, name) {
       Array.from(elements).forEach(element => {
@@ -27,14 +38,23 @@ export default function App() {
         }
       })
     }
-    document.getElementsByClassName('start')[0].classList = 'start'
-    document.getElementsByClassName('end')[0].classList = 'end'
+    try{
+      var start = document.getElementsByClassName('start')[0]
+      var end = document.getElementsByClassName('end')[0]
+      start.classList = 'start'
+      end.classList = 'end'
+    }
+    catch{
+      return
+    }
     blankElements(document.getElementsByClassName('closed'), 'closed')
     blankElements(document.getElementsByClassName('path'), 'path')
     blankElements(document.getElementsByClassName('open'), 'open')
-    algorithm()
+
+    algorithm(start, end)
   }
 
+  // get the given neighbors of a cell.. this includes barriers and closed nodes so have to filter in the function
   function getNeighbors(element) {
     var [row, col] = getCoords(element)
     var elements = []
@@ -47,10 +67,15 @@ export default function App() {
     return (elements)
   }
 
-  function depthFirstSearch() {
+  // stop the interval from running when the algorithm is done
+  function stopInterval(){
+    clearInterval(interval)
+    // we set the interval to undefined so we can check to see if an interval is running or not
+    interval = undefined
+  }
 
-    var start = document.getElementsByClassName('start')[0]
-    var end = document.getElementsByClassName('end')[0]
+  // depth first search algorithm
+  function depthFirstSearch(start, end) {
 
     var lifo = require('stack-lifo')
     var stack = new lifo()
@@ -59,14 +84,14 @@ export default function App() {
     var cameFrom = {}
     var closed = new Set()
 
-    var intr = setInterval(function () {
+    interval = setInterval(function () {
 
       var currentNode = stack.pop()
 
       while (closed.has(currentNode)) {
         currentNode = stack.pop()
         if (stack.isEmpty()) {
-          clearInterval(intr);
+          stopInterval();
           return
         }
       }
@@ -83,23 +108,21 @@ export default function App() {
         cameFrom[getCoords(neighbor)] = currentNode
         stack.push(neighbor)
       }
-      if (stack.isEmpty()) clearInterval(intr);
+      if (stack.isEmpty()) stopInterval();
       if (currentNode === end) {
         while (currentNode !== start) {
           cameFrom[getCoords(currentNode)].classList.add('path')
           cameFrom[getCoords(currentNode)].classList.remove('closed')
           currentNode = cameFrom[getCoords(currentNode)]
         }
-        clearInterval(intr)
+        stopInterval()
         return
       }
     }, 10)
   }
 
-  function breadthFirstSearch() {
-
-    var start = document.getElementsByClassName('start')[0]
-    var end = document.getElementsByClassName('end')[0]
+  // breadth first search algorithm
+  function breadthFirstSearch(start, end) {
 
     var nextQueue = new Queue()
     nextQueue.add(start)
@@ -107,10 +130,10 @@ export default function App() {
 
     var cameFrom = {}
 
-    var intr = setInterval(function () {
+    interval = setInterval(function () {
 
       if (nextQueue.isEmpty()) {
-        clearInterval(intr)
+        stopInterval()
         return
       }
 
@@ -135,7 +158,7 @@ export default function App() {
             cameFrom[getCoords(neighbor)].classList.remove('open')
             neighbor = cameFrom[getCoords(neighbor)]
           }
-          clearInterval(intr)
+          stopInterval()
         return
         }
       }
@@ -145,23 +168,20 @@ export default function App() {
     }, 10)
   }
 
-  // var queue = new PriorityQueue()
-  // queue.queue('owen')
-  // console.log(queue.length)
-  // console.log(queue.peek())
-  // console.log(queue.dequeue())
-  // console.log(queue.peek())
-
-  var boxSize = 20
-  var lastClickedCoords = null
-
-  // click override is basically just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
+  // paint function takes a event and paints color onto the screen
+  // click override is just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
   function paint(e, clickOverride = false) {
 
-    var col = Math.floor(e.clientX / boxSize)
-    var row = Math.floor(e.clientY / boxSize)
+    // big math to figure out which cell the mouse is over
+    var col = Math.floor((e.clientX-((window.innerWidth-document.getElementById('grid').offsetWidth)/2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
+    var row = Math.floor((e.clientY-70) / boxSize)
 
     if (window.event.buttons !== 0 || clickOverride) {
+
+      var element = document.getElementById('row' + row + 'col' + col)
+      if (!element){
+        return
+      }
 
       // check to see if start and end exist, and if not and left clicking place them
       if (document.getElementsByClassName('start').length === 0 && (window.event.buttons === 1 || clickOverride)) {
@@ -203,9 +223,6 @@ export default function App() {
 
         if (window.event.buttons === 1) {
           var currBox = document.getElementById('row' + currentRow + 'col' + currentCol)
-          if (!currBox) {
-            return
-          }
           if (!(currBox.classList.contains('start') || currBox.classList.contains('end'))) {
             currBox.classList.add('barrier')
           }
@@ -221,28 +238,49 @@ export default function App() {
     }
   }
 
-  // right clicking does not pull up context menu
+  // QUEUE TESTING
+  // var queue = new PriorityQueue()
+  // queue.queue('owen')
+  // console.log(queue.length)
+  // console.log(queue.peek())
+  // console.log(queue.dequeue())
+  // console.log(queue.peek())
+
+
+  // no context menu, reload button pops up on resize
   window.addEventListener('contextmenu', e => e.preventDefault())
+  window.addEventListener('resize', e => document.getElementById('resizeAlert').style.display = 'block')
 
-  // when the mouse moves, check if any buttons are pressed, if so react
-  window.addEventListener('mousemove', (e) => paint(e))
-  window.addEventListener('mousedown', (e) => paint(e, true))
 
-  var width = window.innerWidth / boxSize
-  var height = window.innerHeight / boxSize
+  // RENDERING
 
-  var grid = []
-  for (let row = 0; row < height; row++) {
-    grid.push([])
-    for (let col = 0; col < width; col++) {
-      grid[row].push(<Box row={row} col={col} boxSize={boxSize} />)
+  // default cell size
+  var boxSize = 20
+  // used to trace the mouse, as the events don't trigger fast enough for me :/
+  var lastClickedCoords = null
+
+  var gridHeight = Math.floor((window.innerHeight-70) / boxSize)
+  var gridWidth = Math.floor((window.innerWidth) / boxSize)
+
+  function getGrid(){
+    var grid = []
+    for (let row = 0; row < gridHeight; row++) {
+      grid.push([])
+      for (let col = 0; col < gridWidth; col++) {
+        grid[row].push(<Box row={row} col={col} boxSize={boxSize} />)
+      }
     }
+    return(grid)
   }
 
   return (
     <div className="App" style={{ userSelect: 'none' }}>
-      <div id='grid'>
-        {grid.map((row, key) => {
+      <div id='header'>
+        <p className='algorithm' onClick={() => startAlgorithm(depthFirstSearch)}>Depth First Search</p>
+        <p className='algorithm' onClick={() => startAlgorithm(breadthFirstSearch)}>Breadth First Search</p>
+      </div>
+      <div id='grid' onMouseMove={e => paint(e)} onMouseDown={e => paint(e, true)}>
+        {getGrid().map((row, key) => {
           return (
             <div className='row' id={key}>
               {row.map((element) => {
@@ -252,10 +290,7 @@ export default function App() {
           )
         })}
       </div>
-
-      <button style={{ position: 'absolute', bottom: "10px", right: '10px' }} onClick={() => startAlgorithm(breadthFirstSearch)}>
-        go go power rangers
-      </button>
+      <span id='resizeAlert' onClick={() => window.location.reload()}>Looks like you resized your window. <br/> Click here to reset the grid</span>
     </div>
   );
 }
