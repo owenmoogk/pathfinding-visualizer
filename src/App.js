@@ -16,6 +16,23 @@ export default function App() {
     var [row, col] = coords
     return(document.getElementById('row'+row+'col'+col))
   }
+
+  function startAlgorithm(algorithm){
+
+    function blankElements(elements, name){
+      Array.from(elements).forEach(element => {
+        if (!(element.classList.contains('start') || element.classList.contains('end'))){
+          element.classList.remove(name)
+        }
+      })
+    }
+    document.getElementsByClassName('start')[0].classList = 'start'
+    document.getElementsByClassName('end')[0].classList = 'end'
+    blankElements(document.getElementsByClassName('closed'), 'closed')
+    blankElements(document.getElementsByClassName('path'), 'path')
+    blankElements(document.getElementsByClassName('open'), 'open')
+    algorithm()
+  }
   
   function getNeighbors(element){
     var [row, col] = getCoords(element)
@@ -47,6 +64,10 @@ export default function App() {
 
       while (closed.has(currentNode)){
         currentNode = stack.pop()
+        if (stack.isEmpty()){
+          clearInterval(intr);
+          return
+        }
       }
       
       closed.add(currentNode)
@@ -134,6 +155,9 @@ export default function App() {
 
         if (window.event.buttons === 1) {
           var currBox = document.getElementById('row' + currentRow + 'col' + currentCol)
+          if (!currBox){
+            return
+          }
           if (!(currBox.classList.contains('start') || currBox.classList.contains('end'))){
             currBox.classList.add('barrier')
           }
@@ -155,9 +179,6 @@ export default function App() {
   // when the mouse moves, check if any buttons are pressed, if so react
   window.addEventListener('mousemove', (e) => paint(e))
   window.addEventListener('mousedown', (e) => paint(e, true))
-
-  // buttons to activate it
-
 
   var width = window.innerWidth / boxSize
   var height = window.innerHeight / boxSize
@@ -184,7 +205,7 @@ export default function App() {
         })}
       </div>
 
-      <button style={{position: 'absolute', bottom: "10px", right: '10px'}} onClick={() => depthFirstSearch()}>
+      <button style={{position: 'absolute', bottom: "10px", right: '10px'}} onClick={() => startAlgorithm(depthFirstSearch)}>
         go go power rangers
       </button>
     </div>
