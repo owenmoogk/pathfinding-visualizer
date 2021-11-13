@@ -1,27 +1,28 @@
 import PriorityQueue from 'js-priority-queue'
 import Box from './Box.js'
 import './styles.css'
+import Queue from './Queue'
 
 export default function App() {
 
-  function getCoords(element){
+  function getCoords(element) {
     var row = element.getAttribute('row')
     var col = element.getAttribute('col')
     row = parseInt(row)
     col = parseInt(col)
-    return([row, col])
+    return ([row, col])
   }
 
-  function getElement(coords){
+  function getElement(coords) {
     var [row, col] = coords
-    return(document.getElementById('row'+row+'col'+col))
+    return (document.getElementById('row' + row + 'col' + col))
   }
 
-  function startAlgorithm(algorithm){
+  function startAlgorithm(algorithm) {
 
-    function blankElements(elements, name){
+    function blankElements(elements, name) {
       Array.from(elements).forEach(element => {
-        if (!(element.classList.contains('start') || element.classList.contains('end'))){
+        if (!(element.classList.contains('start') || element.classList.contains('end'))) {
           element.classList.remove(name)
         }
       })
@@ -33,20 +34,20 @@ export default function App() {
     blankElements(document.getElementsByClassName('open'), 'open')
     algorithm()
   }
-  
-  function getNeighbors(element){
+
+  function getNeighbors(element) {
     var [row, col] = getCoords(element)
-    var elements =  []
-    elements.push(getElement([row+1, col]))
-    elements.push(getElement([row-1, col]))
-    elements.push(getElement([row, col+1]))
-    elements.push(getElement([row, col-1]))
-    elements = elements.filter((a) =>  a)
-    
-    return(elements)
+    var elements = []
+    elements.push(getElement([row + 1, col]))
+    elements.push(getElement([row - 1, col]))
+    elements.push(getElement([row, col + 1]))
+    elements.push(getElement([row, col - 1]))
+    elements = elements.filter((a) => a)
+
+    return (elements)
   }
 
-  function depthFirstSearch(){
+  function depthFirstSearch() {
 
     var start = document.getElementsByClassName('start')[0]
     var end = document.getElementsByClassName('end')[0]
@@ -54,38 +55,38 @@ export default function App() {
     var lifo = require('stack-lifo')
     var stack = new lifo()
     stack.push(start)
-    
+
     var cameFrom = {}
     var closed = new Set()
 
-    var intr = setInterval(function() {
+    var intr = setInterval(function () {
 
       var currentNode = stack.pop()
 
-      while (closed.has(currentNode)){
+      while (closed.has(currentNode)) {
         currentNode = stack.pop()
-        if (stack.isEmpty()){
+        if (stack.isEmpty()) {
           clearInterval(intr);
           return
         }
       }
-      
+
       closed.add(currentNode)
       currentNode.classList.add('closed')
 
       var neighbors = getNeighbors(currentNode)
       console.log(neighbors)
-      for (let i = 0; i < neighbors.length; i++){
+      for (let i = 0; i < neighbors.length; i++) {
         var neighbor = neighbors[i]
-        if (neighbor.classList.contains('closed') || neighbor.classList.contains('barrier')){
+        if (neighbor.classList.contains('closed') || neighbor.classList.contains('barrier')) {
           continue
         }
         cameFrom[getCoords(neighbor)] = currentNode
         stack.push(neighbor)
       }
       if (stack.isEmpty()) clearInterval(intr);
-      if (currentNode === end){
-        while (currentNode !== start){
+      if (currentNode === end) {
+        while (currentNode !== start) {
           cameFrom[getCoords(currentNode)].classList.add('path')
           cameFrom[getCoords(currentNode)].classList.remove('closed')
           currentNode = cameFrom[getCoords(currentNode)]
@@ -94,9 +95,9 @@ export default function App() {
         return
       }
     }, 10)
-      
+
   }
-  
+
   // var queue = new PriorityQueue()
   // queue.queue('owen')
   // console.log(queue.length)
@@ -104,11 +105,20 @@ export default function App() {
   // console.log(queue.dequeue())
   // console.log(queue.peek())
 
+  // var q = new Queue()
+  // for (let i = 1; i <= 7; i++) {
+  //   q.add(i);
+  // }
+  // // dequeue all elements
+  // while (!q.isEmpty()) {
+  //   console.log(q.dequeue());
+  // }
+
   var boxSize = 20
   var lastClickedCoords = null
 
   // click override is basically just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
-  function paint(e, clickOverride=false) {
+  function paint(e, clickOverride = false) {
 
     var col = Math.floor(e.clientX / boxSize)
     var row = Math.floor(e.clientY / boxSize)
@@ -155,10 +165,10 @@ export default function App() {
 
         if (window.event.buttons === 1) {
           var currBox = document.getElementById('row' + currentRow + 'col' + currentCol)
-          if (!currBox){
+          if (!currBox) {
             return
           }
-          if (!(currBox.classList.contains('start') || currBox.classList.contains('end'))){
+          if (!(currBox.classList.contains('start') || currBox.classList.contains('end'))) {
             currBox.classList.add('barrier')
           }
         }
@@ -205,7 +215,7 @@ export default function App() {
         })}
       </div>
 
-      <button style={{position: 'absolute', bottom: "10px", right: '10px'}} onClick={() => startAlgorithm(depthFirstSearch)}>
+      <button style={{ position: 'absolute', bottom: "10px", right: '10px' }} onClick={() => startAlgorithm(depthFirstSearch)}>
         go go power rangers
       </button>
     </div>
