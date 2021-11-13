@@ -75,7 +75,6 @@ export default function App() {
       currentNode.classList.add('closed')
 
       var neighbors = getNeighbors(currentNode)
-      console.log(neighbors)
       for (let i = 0; i < neighbors.length; i++) {
         var neighbor = neighbors[i]
         if (neighbor.classList.contains('closed') || neighbor.classList.contains('barrier')) {
@@ -95,7 +94,55 @@ export default function App() {
         return
       }
     }, 10)
+  }
 
+  function breadthFirstSearch() {
+
+    var start = document.getElementsByClassName('start')[0]
+    var end = document.getElementsByClassName('end')[0]
+
+    var nextQueue = new Queue()
+    nextQueue.add(start)
+    var nextQueueHash = new Set()
+
+    var cameFrom = {}
+
+    var intr = setInterval(function () {
+
+      if (nextQueue.isEmpty()) {
+        clearInterval(intr)
+        return
+      }
+
+      var currentNode = nextQueue.dequeue()
+
+      var neighbors = getNeighbors(currentNode)
+
+      for (let i = 0; i < neighbors.length; i++) {
+        var neighbor = neighbors[i]
+        if (neighbor.classList.contains('closed') || neighbor.classList.contains('barrier') || nextQueueHash.has(neighbor)) {
+          continue
+        }
+        nextQueue.add(neighbor)
+        nextQueueHash.add(neighbor)
+        neighbor.classList.add('open')
+        cameFrom[getCoords(neighbor)] = currentNode
+        
+        if (neighbor === end){
+          while (neighbor !== start) {
+            cameFrom[getCoords(neighbor)].classList.add('path')
+            cameFrom[getCoords(neighbor)].classList.remove('closed')
+            cameFrom[getCoords(neighbor)].classList.remove('open')
+            neighbor = cameFrom[getCoords(neighbor)]
+          }
+          clearInterval(intr)
+        return
+        }
+      }
+
+      currentNode.classList.remove('open')
+      currentNode.classList.add('closed')
+    }, 10)
   }
 
   // var queue = new PriorityQueue()
@@ -104,15 +151,6 @@ export default function App() {
   // console.log(queue.peek())
   // console.log(queue.dequeue())
   // console.log(queue.peek())
-
-  // var q = new Queue()
-  // for (let i = 1; i <= 7; i++) {
-  //   q.add(i);
-  // }
-  // // dequeue all elements
-  // while (!q.isEmpty()) {
-  //   console.log(q.dequeue());
-  // }
 
   var boxSize = 20
   var lastClickedCoords = null
@@ -215,7 +253,7 @@ export default function App() {
         })}
       </div>
 
-      <button style={{ position: 'absolute', bottom: "10px", right: '10px' }} onClick={() => startAlgorithm(depthFirstSearch)}>
+      <button style={{ position: 'absolute', bottom: "10px", right: '10px' }} onClick={() => startAlgorithm(breadthFirstSearch)}>
         go go power rangers
       </button>
     </div>

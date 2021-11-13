@@ -10,6 +10,6 @@ export default function Queue() {
     }
 
     Queue.prototype.isEmpty = function () {
-        return this.elements.length == 0
+        return this.elements.length === 0
     }
 }
