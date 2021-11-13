@@ -15,15 +15,15 @@ body{
 }
 
 .barrier{
-    background-color: black;
+    background-color: black !important;
 }
 
 .start{
-    background-color: orange;
+    background-color: orange !important;
 }
 
 .end{
-    background-color: teal;
+    background-color: teal !important;
 }
 
 .path{

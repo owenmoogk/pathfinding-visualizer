@@ -7,6 +7,8 @@ export default function App() {
   function getCoords(element){
     var row = element.getAttribute('row')
     var col = element.getAttribute('col')
+    row = parseInt(row)
+    col = parseInt(col)
     return([row, col])
   }
 
@@ -22,9 +24,8 @@ export default function App() {
     elements.push(getElement([row-1, col]))
     elements.push(getElement([row, col+1]))
     elements.push(getElement([row, col-1]))
-    console.log(elements)
     elements = elements.filter((a) =>  a)
-    console.log(elements)
+    
     return(elements)
   }
 
@@ -39,36 +40,40 @@ export default function App() {
     
     var cameFrom = {}
     var closed = new Set()
-    
-    while (stack.size() !== 0){
+
+    var intr = setInterval(function() {
 
       var currentNode = stack.pop()
 
-      if (currentNode === end){
-        // reconstruct path
-        return
-      }
-
-      if (closed.has(currentNode)){
-        continue
+      while (closed.has(currentNode)){
+        currentNode = stack.pop()
       }
       
       closed.add(currentNode)
-
-      if (currentNode !== start){
-        currentNode.classList = 'closed'
-      }
+      currentNode.classList.add('closed')
 
       var neighbors = getNeighbors(currentNode)
+      console.log(neighbors)
       for (let i = 0; i < neighbors.length; i++){
         var neighbor = neighbors[i]
-        if (neighbor.classList.contains('closed')){
+        if (neighbor.classList.contains('closed') || neighbor.classList.contains('barrier')){
           continue
         }
-        cameFrom[neighbor] = currentNode
+        cameFrom[getCoords(neighbor)] = currentNode
         stack.push(neighbor)
       }
-    }
+      if (stack.isEmpty()) clearInterval(intr);
+      if (currentNode === end){
+        while (currentNode !== start){
+          cameFrom[getCoords(currentNode)].classList.add('path')
+          cameFrom[getCoords(currentNode)].classList.remove('closed')
+          currentNode = cameFrom[getCoords(currentNode)]
+        }
+        clearInterval(intr)
+        return
+      }
+    }, 10)
+      
   }
   
   // var queue = new PriorityQueue()
