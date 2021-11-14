@@ -248,6 +248,63 @@ export default function App() {
 
   }
 
+  function dijkstras(start, end) {
+
+    var distances = {}
+    var cameFrom = {}
+
+    function getDistance(point1, point2) {
+      var [row1, col1] = getCoords(point1)
+      var [row2, col2] = getCoords(point2)
+      return (Math.abs(row1 - row2) + Math.abs(col1 - col2))
+    }
+
+    var priority = new PriorityQueue()
+    priority.put(0,0,start)
+
+    interval = setInterval(function () {
+
+      if (priority.isEmpty()) {
+        stopInterval()
+        return
+      }
+
+      var [distance, ignore, currentNode] = priority.get()
+
+      if (currentNode == end){
+        while (currentNode !== start) {
+          cameFrom[getCoords(currentNode)].classList.add('path')
+          cameFrom[getCoords(currentNode)].classList.remove('closed')
+          cameFrom[getCoords(currentNode)].classList.remove('open')
+          currentNode = cameFrom[getCoords(currentNode)]
+        }
+        stopInterval()
+        return
+      }
+
+      var neighbors = getNeighbors(currentNode)
+
+      for (let i = 0; i < neighbors.length; i++) {
+        var neighbor = neighbors[i]
+        if (!(neighbor.classList.contains('closed') || neighbor.classList.contains('barrier'))) {
+          neighbor.classList.add('open')
+          
+          var oldCost = distances[getCoords(neighbor)] || Infinity
+          var newCost = distance + 1
+
+          if (newCost < oldCost){
+            priority.put(newCost, getDistance(neighbor, end), neighbor)
+            distances[getCoords(neighbor)] = newCost
+            cameFrom[getCoords(neighbor)] = currentNode
+          }
+        }
+      }
+      
+      currentNode.classList.remove('open')
+      currentNode.classList.add('closed')
+    }, 10)
+  }
+
   // paint function takes a event and paints color onto the screen
   // click override is just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
   function paint(e, clickOverride = false) {
@@ -345,7 +402,8 @@ export default function App() {
   var functionKeys = {
     'depthFirstSearch': depthFirstSearch,
     'breadthFirstSearch': breadthFirstSearch,
-    'aStar': astar
+    'aStar': astar,
+    'dijkstras': dijkstras
   }
 
   return (
@@ -354,6 +412,7 @@ export default function App() {
         <p onClick={() => startAlgorithm(functionKeys)} id='goButton'>Go</p>
         <select id="algorithm">
           <option value='aStar'>AStar</option>
+          <option value='dijkstras'>Dijkstras</option>
           <option value='breadthFirstSearch'>Breadth First Search</option>
           <option value='depthFirstSearch'>Depth First Search</option>
         </select>
