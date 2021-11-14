@@ -6,6 +6,9 @@ import { useState } from 'react'
 
 export default function App() {
 
+  // keep track of weather or not it is running
+  const [running, setRunning] = useState()
+
   // timing for visualizations
   var interval = undefined;
 
@@ -25,11 +28,14 @@ export default function App() {
   }
 
   // clears the used squares before running, checks start and end, passed the function to call.
-  function startAlgorithm(algorithm) {
+  function startAlgorithm(functionKeys) {
 
-    if (interval){
+    if (running) {
       return
     }
+
+    setRunning(true)
+    var algorithmFunction = functionKeys[document.getElementById('algorithm').value]
 
     function blankElements(elements, name) {
       Array.from(elements).forEach(element => {
@@ -38,20 +44,20 @@ export default function App() {
         }
       })
     }
-    try{
+    try {
       var start = document.getElementsByClassName('start')[0]
       var end = document.getElementsByClassName('end')[0]
       start.classList = 'start'
       end.classList = 'end'
     }
-    catch{
+    catch {
       return
     }
     blankElements(document.getElementsByClassName('closed'), 'closed')
     blankElements(document.getElementsByClassName('path'), 'path')
     blankElements(document.getElementsByClassName('open'), 'open')
 
-    algorithm(start, end)
+    algorithmFunction(start, end)
   }
 
   // get the given neighbors of a cell.. this includes barriers and closed nodes so have to filter in the function
@@ -68,10 +74,9 @@ export default function App() {
   }
 
   // stop the interval from running when the algorithm is done
-  function stopInterval(){
+  function stopInterval() {
     clearInterval(interval)
-    // we set the interval to undefined so we can check to see if an interval is running or not
-    interval = undefined
+    setRunning(false)
   }
 
   // depth first search algorithm
@@ -150,8 +155,8 @@ export default function App() {
         nextQueueHash.add(neighbor)
         neighbor.classList.add('open')
         cameFrom[getCoords(neighbor)] = currentNode
-        
-        if (neighbor === end){
+
+        if (neighbor === end) {
           while (neighbor !== start) {
             cameFrom[getCoords(neighbor)].classList.add('path')
             cameFrom[getCoords(neighbor)].classList.remove('closed')
@@ -159,7 +164,7 @@ export default function App() {
             neighbor = cameFrom[getCoords(neighbor)]
           }
           stopInterval()
-        return
+          return
         }
       }
 
@@ -173,13 +178,13 @@ export default function App() {
   function paint(e, clickOverride = false) {
 
     // big math to figure out which cell the mouse is over
-    var col = Math.floor((e.clientX-((window.innerWidth-document.getElementById('grid').offsetWidth)/2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
-    var row = Math.floor((e.clientY-70) / boxSize)
+    var col = Math.floor((e.clientX - ((window.innerWidth - document.getElementById('grid').offsetWidth) / 2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
+    var row = Math.floor((e.clientY - 70) / boxSize)
 
     if (window.event.buttons !== 0 || clickOverride) {
 
       var element = document.getElementById('row' + row + 'col' + col)
-      if (!element){
+      if (!element) {
         return
       }
 
@@ -251,7 +256,6 @@ export default function App() {
   window.addEventListener('contextmenu', e => e.preventDefault())
   window.addEventListener('resize', e => document.getElementById('resizeAlert').style.display = 'block')
 
-
   // RENDERING
 
   // default cell size
@@ -259,10 +263,10 @@ export default function App() {
   // used to trace the mouse, as the events don't trigger fast enough for me :/
   var lastClickedCoords = null
 
-  var gridHeight = Math.floor((window.innerHeight-70) / boxSize)
+  var gridHeight = Math.floor((window.innerHeight - 70) / boxSize)
   var gridWidth = Math.floor((window.innerWidth) / boxSize)
 
-  function getGrid(){
+  function getGrid() {
     var grid = []
     for (let row = 0; row < gridHeight; row++) {
       grid.push([])
@@ -270,14 +274,22 @@ export default function App() {
         grid[row].push(<Box row={row} col={col} boxSize={boxSize} />)
       }
     }
-    return(grid)
+    return (grid)
+  }
+
+  var functionKeys = {
+    'depthFirstSearch': depthFirstSearch,
+    'breadthFirstSearch': breadthFirstSearch,
   }
 
   return (
     <div className="App" style={{ userSelect: 'none' }}>
       <div id='header'>
-        <p className='algorithm' onClick={() => startAlgorithm(depthFirstSearch)}>Depth First Search</p>
-        <p className='algorithm' onClick={() => startAlgorithm(breadthFirstSearch)}>Breadth First Search</p>
+        <p onClick={() => startAlgorithm(functionKeys)} style={{ color: running ? 'grey' : 'white' }}>Go</p>
+        <select id="algorithm">
+          <option value='breadthFirstSearch'>Breadth First Search</option>
+          <option value='depthFirstSearch'>Depth First Search</option>
+        </select>
       </div>
       <div id='grid' onMouseMove={e => paint(e)} onMouseDown={e => paint(e, true)}>
         {getGrid().map((row, key) => {
@@ -290,7 +302,7 @@ export default function App() {
           )
         })}
       </div>
-      <span id='resizeAlert' onClick={() => window.location.reload()}>Looks like you resized your window. <br/> Click here to reset the grid</span>
+      <span id='resizeAlert' onClick={() => window.location.reload()}>Looks like you resized your window. <br /> Click here to reset the grid</span>
     </div>
   );
 }
