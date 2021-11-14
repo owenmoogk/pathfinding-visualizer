@@ -1,13 +1,12 @@
 import Box from './Box.js'
 import './styles.css'
 import Queue from './Queue'
-import { useState } from 'react'
 import PriorityQueue from './PriorityQueue.js'
 
 export default function App() {
 
   // keep track of weather or not it is running
-  const [running, setRunning] = useState()
+  var running;
 
   // timing for visualizations
   var interval = undefined;
@@ -33,15 +32,11 @@ export default function App() {
       return
     }
 
-    setRunning(true)
+    running = true
     var algorithmFunction = functionKeys[document.getElementById('algorithm').value]
 
     function blankElements(elements, name) {
-      Array.from(elements).forEach(element => {
-        if (!(element.classList.contains('start') || element.classList.contains('end'))) {
-          element.classList.remove(name)
-        }
-      })
+      Array.from(elements).forEach(element => element.classList.remove(name))
     }
     try {
       var start = document.getElementsByClassName('start')[0]
@@ -55,7 +50,7 @@ export default function App() {
     blankElements(document.getElementsByClassName('closed'), 'closed')
     blankElements(document.getElementsByClassName('path'), 'path')
     blankElements(document.getElementsByClassName('open'), 'open')
-
+    document.getElementById('goButton').style.color = 'grey'
     algorithmFunction(start, end)
   }
 
@@ -75,7 +70,8 @@ export default function App() {
   // stop the interval from running when the algorithm is done
   function stopInterval() {
     clearInterval(interval)
-    setRunning(false)
+    running = false
+    document.getElementById('goButton').style.color = ''
   }
 
   // depth first search algorithm
@@ -179,7 +175,7 @@ export default function App() {
     function h(point1, point2) {
       var [row1, col1] = getCoords(point1)
       var [row2, col2] = getCoords(point2)
-      return(Math.abs(row1-row2) + Math.abs(col1-col2))
+      return (Math.abs(row1 - row2) + Math.abs(col1 - col2))
     }
 
     var openSet = new PriorityQueue()
@@ -219,7 +215,7 @@ export default function App() {
         stopInterval()
         return
       }
-      
+
       var neighbors = getNeighbors(currentNode)
       for (let i = 0; i < neighbors.length; i++) {
         var neighbor = neighbors[i]
@@ -229,11 +225,11 @@ export default function App() {
 
         var tempGScore = gScore[getCoords(currentNode)] + 1
         var currGScore = gScore[getCoords(neighbor)]
-        if (!currGScore){
+        if (!currGScore) {
           currGScore = Infinity
         }
 
-        if (tempGScore < currGScore){
+        if (tempGScore < currGScore) {
           cameFrom[getCoords(neighbor)] = currentNode
 
           gScore[getCoords(neighbor)] = tempGScore
@@ -243,7 +239,7 @@ export default function App() {
           openSetHash.add(neighbor)
           neighbor.classList.add('open')
         }
-        
+
       }
 
       currentNode.classList.remove('open')
@@ -356,7 +352,7 @@ export default function App() {
   return (
     <div className="App" style={{ userSelect: 'none' }}>
       <div id='header'>
-        <p onClick={() => startAlgorithm(functionKeys)} style={{ color: running ? 'grey' : 'white' }}>Go</p>
+        <p onClick={() => startAlgorithm(functionKeys)} id='goButton'>Go</p>
         <select id="algorithm">
           <option value='aStar'>AStar</option>
           <option value='breadthFirstSearch'>Breadth First Search</option>
