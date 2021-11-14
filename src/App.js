@@ -252,11 +252,10 @@ export default function App() {
   // click override is just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
   function paint(e, clickOverride = false) {
 
-    // big math to figure out which cell the mouse is over
-    var col = Math.floor((e.clientX - ((window.innerWidth - document.getElementById('grid').offsetWidth) / 2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
-    var row = Math.floor((e.clientY - 60) / boxSize)
-
-    if (window.event.buttons !== 0 || clickOverride) {
+    if ((window.event.buttons !== 0 || clickOverride) && !running) {
+      // big math to figure out which cell the mouse is over
+      var col = Math.floor((e.clientX - ((window.innerWidth - document.getElementById('grid').offsetWidth) / 2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
+      var row = Math.floor((e.clientY - 60) / boxSize)
 
       var element = document.getElementById('row' + row + 'col' + col)
       if (!element) {
