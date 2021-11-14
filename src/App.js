@@ -1,8 +1,8 @@
-import PriorityQueue from 'js-priority-queue'
 import Box from './Box.js'
 import './styles.css'
 import Queue from './Queue'
 import { useState } from 'react'
+import PriorityQueue from './PriorityQueue.js'
 
 export default function App() {
 
@@ -29,7 +29,6 @@ export default function App() {
 
   // clears the used squares before running, checks start and end, passed the function to call.
   function startAlgorithm(functionKeys) {
-
     if (running) {
       return
     }
@@ -173,6 +172,86 @@ export default function App() {
     }, 10)
   }
 
+  // astar search algorithm
+  function astar(start, end) {
+
+    // heuristic function
+    function h(point1, point2) {
+      var [row1, col1] = getCoords(point1)
+      var [row2, col2] = getCoords(point2)
+      return(Math.abs(row1-row2) + Math.abs(col1-col2))
+    }
+
+    var openSet = new PriorityQueue()
+    openSet.put(0, 0, start)
+    var openSetHash = new Set()
+    openSetHash.add(start)
+
+    var cameFrom = {}
+
+    var gScore = {}
+    var fScore = {}
+
+    gScore[getCoords(start)] = 0
+    fScore[getCoords(start)] = h(start, end)
+
+    interval = setInterval(function () {
+
+      if (openSet.isEmpty()) {
+        stopInterval()
+        return
+      }
+      var currentNode = openSet.get()
+      try{
+        openSetHash.delete(currentNode)
+      }
+      catch{
+        return
+      }
+      
+      if (currentNode === end) {
+        while (currentNode !== start) {
+          cameFrom[getCoords(currentNode)].classList.add('path')
+          cameFrom[getCoords(currentNode)].classList.remove('closed')
+          cameFrom[getCoords(currentNode)].classList.remove('open')
+          currentNode = cameFrom[getCoords(currentNode)]
+        }
+        stopInterval()
+        return
+      }
+      
+      var neighbors = getNeighbors(currentNode)
+      for (let i = 0; i < neighbors.length; i++) {
+        var neighbor = neighbors[i]
+        if (neighbor.classList.contains('barrier')) {
+          continue
+        }
+
+        var tempGScore = gScore[getCoords(currentNode)] + 1
+        var currGScore = gScore[getCoords(neighbor)]
+        if (!currGScore){
+          currGScore = Infinity
+        }
+
+        if (tempGScore < currGScore){
+          cameFrom[getCoords(neighbor)] = currentNode
+
+          gScore[getCoords(neighbor)] = tempGScore
+          fScore[getCoords(neighbor)] = tempGScore + h(neighbor, end)
+
+          openSet.put(fScore[getCoords(neighbor)], h(neighbor, end), neighbor)
+          openSetHash.add(neighbor)
+          neighbor.classList.add('open')
+        }
+        
+      }
+
+      currentNode.classList.remove('open')
+      currentNode.classList.add('closed')
+    }, 10)
+
+  }
+
   // paint function takes a event and paints color onto the screen
   // click override is just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
   function paint(e, clickOverride = false) {
@@ -243,15 +322,6 @@ export default function App() {
     }
   }
 
-  // QUEUE TESTING
-  // var queue = new PriorityQueue()
-  // queue.queue('owen')
-  // console.log(queue.length)
-  // console.log(queue.peek())
-  // console.log(queue.dequeue())
-  // console.log(queue.peek())
-
-
   // no context menu, reload button pops up on resize
   window.addEventListener('contextmenu', e => e.preventDefault())
   window.addEventListener('resize', e => document.getElementById('resizeAlert').style.display = 'block')
@@ -280,6 +350,7 @@ export default function App() {
   var functionKeys = {
     'depthFirstSearch': depthFirstSearch,
     'breadthFirstSearch': breadthFirstSearch,
+    'aStar': astar
   }
 
   return (
@@ -287,6 +358,7 @@ export default function App() {
       <div id='header'>
         <p onClick={() => startAlgorithm(functionKeys)} style={{ color: running ? 'grey' : 'white' }}>Go</p>
         <select id="algorithm">
+          <option value='aStar'>AStar</option>
           <option value='breadthFirstSearch'>Breadth First Search</option>
           <option value='depthFirstSearch'>Depth First Search</option>
         </select>
