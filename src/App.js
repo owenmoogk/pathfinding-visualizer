@@ -74,6 +74,15 @@ export default function App() {
     document.getElementById('goButton').style.color = ''
   }
 
+  function reconstructPath(start, currentNode, cameFrom) {
+    while (currentNode !== start) {
+      cameFrom[getCoords(currentNode)].classList.add('path')
+      cameFrom[getCoords(currentNode)].classList.remove('closed')
+      cameFrom[getCoords(currentNode)].classList.remove('open')
+      currentNode = cameFrom[getCoords(currentNode)]
+    }
+  }
+
   // depth first search algorithm
   function depthFirstSearch(start, end) {
 
@@ -110,11 +119,7 @@ export default function App() {
       }
       if (stack.isEmpty()) stopInterval();
       if (currentNode === end) {
-        while (currentNode !== start) {
-          cameFrom[getCoords(currentNode)].classList.add('path')
-          cameFrom[getCoords(currentNode)].classList.remove('closed')
-          currentNode = cameFrom[getCoords(currentNode)]
-        }
+        reconstructPath(start, currentNode, cameFrom)
         stopInterval()
         return
       }
@@ -152,12 +157,7 @@ export default function App() {
         cameFrom[getCoords(neighbor)] = currentNode
 
         if (neighbor === end) {
-          while (neighbor !== start) {
-            cameFrom[getCoords(neighbor)].classList.add('path')
-            cameFrom[getCoords(neighbor)].classList.remove('closed')
-            cameFrom[getCoords(neighbor)].classList.remove('open')
-            neighbor = cameFrom[getCoords(neighbor)]
-          }
+          reconstructPath(start, neighbor, cameFrom)
           stopInterval()
           return
         }
@@ -197,21 +197,16 @@ export default function App() {
         stopInterval()
         return
       }
-      
+
       var currentNode;
       var found = false;
-      while (!found){
+      while (!found) {
         currentNode = openSet.get()[2]
         found = openSetHash.delete(currentNode)
       }
 
       if (currentNode === end) {
-        while (currentNode !== start) {
-          cameFrom[getCoords(currentNode)].classList.add('path')
-          cameFrom[getCoords(currentNode)].classList.remove('closed')
-          cameFrom[getCoords(currentNode)].classList.remove('open')
-          currentNode = cameFrom[getCoords(currentNode)]
-        }
+        reconstructPath(start, currentNode,  cameFrom)
         stopInterval()
         return
       }
@@ -257,7 +252,7 @@ export default function App() {
     }
 
     var priority = new PriorityQueue()
-    priority.put(0,0,start)
+    priority.put(0, 0, start)
 
     interval = setInterval(function () {
 
@@ -268,13 +263,8 @@ export default function App() {
 
       var [distance, ignore, currentNode] = priority.get()
 
-      if (currentNode == end){
-        while (currentNode !== start) {
-          cameFrom[getCoords(currentNode)].classList.add('path')
-          cameFrom[getCoords(currentNode)].classList.remove('closed')
-          cameFrom[getCoords(currentNode)].classList.remove('open')
-          currentNode = cameFrom[getCoords(currentNode)]
-        }
+      if (currentNode == end) {
+        reconstructPath(start, currentNode, cameFrom)
         stopInterval()
         return
       }
@@ -285,18 +275,18 @@ export default function App() {
         var neighbor = neighbors[i]
         if (!(neighbor.classList.contains('closed') || neighbor.classList.contains('barrier'))) {
           neighbor.classList.add('open')
-          
+
           var oldCost = distances[getCoords(neighbor)] || Infinity
           var newCost = distance + 1
 
-          if (newCost < oldCost){
+          if (newCost < oldCost) {
             priority.put(newCost, getDistance(neighbor, end), neighbor)
             distances[getCoords(neighbor)] = newCost
             cameFrom[getCoords(neighbor)] = currentNode
           }
         }
       }
-      
+
       currentNode.classList.remove('open')
       currentNode.classList.add('closed')
     }, 10)
