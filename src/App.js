@@ -197,14 +197,14 @@ export default function App() {
         stopInterval()
         return
       }
-      var currentNode = openSet.get()
-      try{
-        openSetHash.delete(currentNode)
-      }
-      catch{
-        return
-      }
       
+      var currentNode;
+      var found = false;
+      while (!found){
+        currentNode = openSet.get()
+        found = openSetHash.delete(currentNode)
+      }
+
       if (currentNode === end) {
         while (currentNode !== start) {
           cameFrom[getCoords(currentNode)].classList.add('path')
