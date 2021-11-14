@@ -179,7 +179,7 @@ export default function App() {
 
     // big math to figure out which cell the mouse is over
     var col = Math.floor((e.clientX - ((window.innerWidth - document.getElementById('grid').offsetWidth) / 2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
-    var row = Math.floor((e.clientY - 70) / boxSize)
+    var row = Math.floor((e.clientY - 60) / boxSize)
 
     if (window.event.buttons !== 0 || clickOverride) {
 
@@ -263,7 +263,7 @@ export default function App() {
   // used to trace the mouse, as the events don't trigger fast enough for me :/
   var lastClickedCoords = null
 
-  var gridHeight = Math.floor((window.innerHeight - 70) / boxSize)
+  var gridHeight = Math.floor((window.innerHeight - 60) / boxSize)
   var gridWidth = Math.floor((window.innerWidth) / boxSize)
 
   function getGrid() {
