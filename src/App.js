@@ -224,10 +224,7 @@ export default function App() {
         }
 
         var tempGScore = gScore[getCoords(currentNode)] + 1
-        var currGScore = gScore[getCoords(neighbor)]
-        if (!currGScore) {
-          currGScore = Infinity
-        }
+        var currGScore = gScore[getCoords(neighbor)] || Infinity
 
         if (tempGScore < currGScore) {
           cameFrom[getCoords(neighbor)] = currentNode
