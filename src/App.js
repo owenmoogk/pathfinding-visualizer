@@ -201,7 +201,7 @@ export default function App() {
       var currentNode;
       var found = false;
       while (!found){
-        currentNode = openSet.get()
+        currentNode = openSet.get()[2]
         found = openSetHash.delete(currentNode)
       }
 

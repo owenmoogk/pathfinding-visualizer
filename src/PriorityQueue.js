@@ -56,7 +56,8 @@ export default class PriorityQueue {
         // returns Underflow
         if (this.isEmpty())
             return "Underflow";
-        return this.items.shift().element;
+        var value = this.items.shift()
+        return [value.priority, value.priority2, value.element];
     }
     front() {
         // returns the highest priority element
