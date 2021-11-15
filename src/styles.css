@@ -101,3 +101,24 @@ p{
     text-align: center;
     font-size: 20px;
 }
+
+a{
+    color: white;
+    text-decoration: none;
+}
+
+a:hover{
+    color: lightgrey;
+}
+
+#infoButton{
+    position: absolute;
+    top: 17.5px;
+    right: 20px;
+}
+
+#myName{
+    position: absolute;
+    left: 20px;
+    top: 17.5px;
+}
