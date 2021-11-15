@@ -206,7 +206,7 @@ export default function App() {
       }
 
       if (currentNode === end) {
-        reconstructPath(start, currentNode,  cameFrom)
+        reconstructPath(start, currentNode, cameFrom)
         stopInterval()
         return
       }
@@ -240,6 +240,7 @@ export default function App() {
 
   }
 
+  // dijkstras search algorithm
   function dijkstras(start, end) {
 
     var distances = {}
@@ -290,6 +291,75 @@ export default function App() {
       currentNode.classList.remove('open')
       currentNode.classList.add('closed')
     }, 10)
+  }
+
+  // greedy best first search algorithm
+  function greedyBestFirstSearch(start, end) {
+
+    function getLowestHeuristic(heuristics) {
+      var lowestH = Infinity
+      var coords = []
+      for (const [key, value] of Object.entries(heuristics)) {
+        if (value < lowestH) {
+          lowestH = value
+          coords = key
+        }
+      }
+      if (lowestH === Infinity) {
+        return (null)
+      }
+      coords = coords.split(',')
+      for (var i = 0; i < 2; i++) {
+        coords[i] = parseInt(coords[i])
+      }
+      return (getElement(coords))
+    }
+
+    function distance(point1, point2) {
+      var [row1, col1] = getCoords(point1)
+      var [row2, col2] = getCoords(point2)
+      return (Math.abs(row1 - row2) + Math.abs(col1 - col2))
+    }
+
+    var heuristics = {}
+    heuristics[getCoords(start)] = distance(start, end)
+
+    var cameFrom = {}
+
+    interval = setInterval(function () {
+
+      var currentNode = getLowestHeuristic(heuristics)
+
+      if (!currentNode) {
+        stopInterval();
+        return
+      }
+
+      var neighbors = getNeighbors(currentNode)
+      for (let i = 0; i < neighbors.length; i++) {
+        var neighbor = neighbors[i]
+        if (neighbor.classList.contains('barrier') || neighbor.classList.contains('closed')) {
+          continue
+        }
+
+        heuristics[getCoords(neighbor)] = distance(neighbor, end)
+        neighbor.classList.add('open')
+        cameFrom[getCoords(neighbor)] = currentNode
+
+        if (neighbor === end) {
+          reconstructPath(start, neighbor, cameFrom)
+          stopInterval()
+          return
+        }
+
+      }
+
+      heuristics[getCoords(currentNode)] = Infinity
+
+      currentNode.classList.remove('open')
+      currentNode.classList.add('closed')
+    }, 10)
+
   }
 
   // paint function takes a event and paints color onto the screen
@@ -361,7 +431,7 @@ export default function App() {
     }
   }
 
-  function algorithmChange(e){
+  function algorithmChange(e) {
     var algo = e.target.value
     document.getElementById('infoAboutAlgo').innerHTML = writeUps[algo]
   }
@@ -395,14 +465,16 @@ export default function App() {
     'depthFirstSearch': depthFirstSearch,
     'breadthFirstSearch': breadthFirstSearch,
     'aStar': astar,
-    'dijkstras': dijkstras
+    'dijkstras': dijkstras,
+    "greedy": greedyBestFirstSearch
   }
 
   var writeUps = {
     'depthFirstSearch': "Depth First Search is <b>Not Weighted</b> and <b>Does Not Guarantee</b> the shortest path",
     'breadthFirstSearch': 'Breadth First Search is <b>Not Weighted</b> and <b>Guarantees</b> the shortest path',
     'aStar': 'AStar is <b>Weighted</b> and <b>Guarantees</b> the shortest path',
-    'dijkstras': "Dijkstras is <b>Weighted</b> and <b>Guarantees</b> the shortest path"
+    'dijkstras': "Dijkstras is <b>Weighted</b> and <b>Guarantees</b> the shortest path",
+    "greedy": "Greedy Best First Search is <b>Weighted</b> and <b>Does Not Guarantee</b> the shortest path"
   }
 
   return (
@@ -411,6 +483,7 @@ export default function App() {
         <p onClick={() => startAlgorithm(functionKeys)} id='goButton'>Go</p>
         <select id="algorithm" onChange={(e) => algorithmChange(e)}>
           <option value='aStar'>AStar</option>
+          <option value='greedy'>Greedy Best First Search</option>
           <option value='dijkstras'>Dijkstras</option>
           <option value='breadthFirstSearch'>Breadth First Search</option>
           <option value='depthFirstSearch'>Depth First Search</option>
