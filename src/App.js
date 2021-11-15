@@ -54,7 +54,7 @@ export default function App() {
     blankElements(document.getElementsByClassName('closed'), 'closed')
     blankElements(document.getElementsByClassName('path'), 'path')
     blankElements(document.getElementsByClassName('open'), 'open')
-    
+
     algorithmFunction(start, end)
   }
 
@@ -368,6 +368,65 @@ export default function App() {
 
   }
 
+  // astar search algorithm
+  function snake(start, end) {
+
+    // heuristic function
+    function h(point1, point2) {
+      var [row1, col1] = getCoords(point1)
+      var [row2, col2] = getCoords(point2)
+      return (Math.abs(row1 - row2) + Math.abs(col1 - col2))
+    }
+
+    var openSet = new PriorityQueue()
+    openSet.put(0, 0, start)
+    var openSetHash = new Set()
+    openSetHash.add(start)
+
+    var cameFrom = {}
+    var count = 0
+
+    interval = setInterval(function () {
+
+      count += 1
+
+      var currentNode;
+      var found = false;
+      while (!found) {
+        if (openSet.isEmpty()) {
+          stopInterval()
+          return
+        }
+        currentNode = openSet.get()[2]
+        found = openSetHash.delete(currentNode)
+      }
+
+      var neighbors = getNeighbors(currentNode)
+      for (let i = 0; i < neighbors.length; i++) {
+        var neighbor = neighbors[i]
+        if (neighbor.classList.contains('barrier') || neighbor.classList.contains('closed')) {
+          continue
+        }
+
+        cameFrom[getCoords(neighbor)] = currentNode
+        
+        if (neighbor === end) {
+          reconstructPath(start, neighbor, cameFrom)
+          stopInterval()
+          return
+        }
+
+        openSet.put(-count, h(neighbor, end), neighbor)
+        openSetHash.add(neighbor)
+
+      }
+
+      currentNode.classList.remove('open')
+      currentNode.classList.add('closed')
+    }, 10)
+
+  }
+
   // paint function takes a event and paints color onto the screen
   // click override is just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
   function paint(e, clickOverride = false) {
@@ -472,7 +531,8 @@ export default function App() {
     'breadthFirstSearch': breadthFirstSearch,
     'aStar': astar,
     'dijkstras': dijkstras,
-    "greedy": greedyBestFirstSearch
+    "greedy": greedyBestFirstSearch,
+    "snake": snake
   }
 
   var writeUps = {
@@ -480,7 +540,8 @@ export default function App() {
     'breadthFirstSearch': 'Breadth First Search is <b>Not Weighted</b> and <b>Guarantees</b> the shortest path',
     'aStar': 'AStar is <b>Weighted</b> and <b>Guarantees</b> the shortest path',
     'dijkstras': "Dijkstras is <b>Weighted</b> and <b>Guarantees</b> the shortest path",
-    "greedy": "Greedy Best First Search is <b>Weighted</b> and <b>Does Not Guarantee</b> the shortest path"
+    "greedy": "Greedy Best First Search is <b>Weighted</b> and <b>Does Not Guarantee</b> the shortest path",
+    "snake": "Snake is <b>Weighted</b> and <b>Does Not Guarantee</b> the shortest path"
   }
 
   return (
@@ -493,6 +554,7 @@ export default function App() {
           <option value='dijkstras'>Dijkstras</option>
           <option value='breadthFirstSearch'>Breadth First Search</option>
           <option value='depthFirstSearch'>Depth First Search</option>
+          <option value='snake'>Snake</option>
         </select>
       </div>
       <div id='infoBar'>
