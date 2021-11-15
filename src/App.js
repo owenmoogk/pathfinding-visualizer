@@ -199,14 +199,14 @@ export default function App() {
 
     interval = setInterval(function () {
 
-      if (openSet.isEmpty()) {
-        stopInterval()
-        return
-      }
-
+      
       var currentNode;
       var found = false;
       while (!found) {
+        if (openSet.isEmpty()) {
+          stopInterval()
+          return
+        }
         currentNode = openSet.get()[2]
         found = openSetHash.delete(currentNode)
       }
