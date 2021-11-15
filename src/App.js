@@ -263,7 +263,7 @@ export default function App() {
 
       var [distance, ignore, currentNode] = priority.get()
 
-      if (currentNode == end) {
+      if (currentNode === end) {
         reconstructPath(start, currentNode, cameFrom)
         stopInterval()
         return
@@ -299,7 +299,7 @@ export default function App() {
     if ((window.event.buttons !== 0 || clickOverride) && !running) {
       // big math to figure out which cell the mouse is over
       var col = Math.floor((e.clientX - ((window.innerWidth - document.getElementById('grid').offsetWidth) / 2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
-      var row = Math.floor((e.clientY - 60) / boxSize)
+      var row = Math.floor((e.clientY - 90) / boxSize)
 
       var element = document.getElementById('row' + row + 'col' + col)
       if (!element) {
@@ -361,6 +361,11 @@ export default function App() {
     }
   }
 
+  function algorithmChange(e){
+    var algo = e.target.value
+    document.getElementById('infoAboutAlgo').innerHTML = writeUps[algo]
+  }
+
   // no context menu, reload button pops up on resize
   window.addEventListener('contextmenu', e => e.preventDefault())
   window.addEventListener('resize', e => document.getElementById('resizeAlert').style.display = 'block')
@@ -372,7 +377,7 @@ export default function App() {
   // used to trace the mouse, as the events don't trigger fast enough for me :/
   var lastClickedCoords = null
 
-  var gridHeight = Math.floor((window.innerHeight - 60) / boxSize)
+  var gridHeight = Math.floor((window.innerHeight - 90) / boxSize)
   var gridWidth = Math.floor((window.innerWidth) / boxSize)
 
   function getGrid() {
@@ -393,16 +398,26 @@ export default function App() {
     'dijkstras': dijkstras
   }
 
+  var writeUps = {
+    'depthFirstSearch': "Depth First Search is <b>Not Weighted</b> and <b>Does Not Guarantee</b> the shortest path",
+    'breadthFirstSearch': 'Breadth First Search is <b>Not Weighted</b> and <b>Guarantees</b> the shortest path',
+    'aStar': 'AStar is <b>Weighted</b> and <b>Guarantees</b> the shortest path',
+    'dijkstras': "Dijkstras is <b>Weighted</b> and <b>Guarantees</b> the shortest path"
+  }
+
   return (
     <div className="App" style={{ userSelect: 'none' }}>
       <div id='header'>
         <p onClick={() => startAlgorithm(functionKeys)} id='goButton'>Go</p>
-        <select id="algorithm">
+        <select id="algorithm" onChange={(e) => algorithmChange(e)}>
           <option value='aStar'>AStar</option>
           <option value='dijkstras'>Dijkstras</option>
           <option value='breadthFirstSearch'>Breadth First Search</option>
           <option value='depthFirstSearch'>Depth First Search</option>
         </select>
+      </div>
+      <div id='infoBar'>
+        <p id='infoAboutAlgo'>AStar is <b>Weighted</b> and <b>Guarantees</b> the shortest path</p>
       </div>
       <div id='grid' onMouseMove={e => paint(e)} onMouseDown={e => paint(e, true)}>
         {getGrid().map((row, key) => {

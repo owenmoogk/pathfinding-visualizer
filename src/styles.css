@@ -86,3 +86,18 @@ select{
 select option{
     color: black;
 }
+
+#infoBar{
+    height: 30px;
+    background-color: lightgrey;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+p{
+    margin: 0;
+    text-align: center;
+    font-size: 20px;
+}
