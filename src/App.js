@@ -29,8 +29,12 @@ export default function App() {
   // clears the used squares before running, checks start and end, passed the function to call.
   function startAlgorithm(functionKeys) {
     if (running) {
+      stopInterval()
       return
     }
+    var goButton = document.getElementById('goButton')
+    goButton.innerHTML = "Stop"
+    goButton.style.color = 'Red'
 
     running = true
     var algorithmFunction = functionKeys[document.getElementById('algorithm').value]
@@ -50,7 +54,7 @@ export default function App() {
     blankElements(document.getElementsByClassName('closed'), 'closed')
     blankElements(document.getElementsByClassName('path'), 'path')
     blankElements(document.getElementsByClassName('open'), 'open')
-    document.getElementById('goButton').style.color = 'grey'
+    
     algorithmFunction(start, end)
   }
 
@@ -71,7 +75,9 @@ export default function App() {
   function stopInterval() {
     clearInterval(interval)
     running = false
-    document.getElementById('goButton').style.color = ''
+    var goButton = document.getElementById('goButton')
+    goButton.innerHTML = "Go"
+    goButton.style.color = ''
   }
 
   function reconstructPath(start, currentNode, cameFrom) {
