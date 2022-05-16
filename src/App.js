@@ -572,8 +572,8 @@ export default function App() {
         })}
       </div>
       <span id='resizeAlert' onClick={() => window.location.reload()}>Looks like you resized your window. <br /> Click here to reset the grid</span>
-      <p id='myName'><a href='https://owenmoogk.tk' target='_blank' rel='noreferrer'>Owen Moogk</a></p>
-      <p id='infoButton'><a href='https://owenmoogk.tk/projects/pathfinding-visualizer' target='_blank' rel='noreferrer'>About This Project</a></p>
+      <p id='myName'><a href='https://owenmoogk.github.io' target='_blank' rel='noreferrer'>Owen Moogk</a></p>
+      <p id='infoButton'><a href='https://owenmoogk.github.io/projects/pathfinding-visualizer' target='_blank' rel='noreferrer'>About This Project</a></p>
     </div>
   );
 }
