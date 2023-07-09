@@ -2,8 +2,12 @@ import Box from './Box.js'
 import './styles.css'
 import Queue from './Queue'
 import PriorityQueue from './PriorityQueue.js'
+import { useState } from 'react'
 
 export default function App() {
+
+  const [startSet, setStartSet] = useState(false)
+  const [endSet, setEndSet] =  useState(false)
 
   // keep track of weather or not it is running
   var running;
@@ -268,7 +272,7 @@ export default function App() {
         return
       }
 
-      var [distance, ignore, currentNode] = priority.get()
+      var [distance, _, currentNode] = priority.get()
 
       if (currentNode === end) {
         reconstructPath(start, currentNode, cameFrom)
@@ -427,75 +431,6 @@ export default function App() {
 
   }
 
-  // paint function takes a event and paints color onto the screen
-  // click override is just saying it was a click event and not mouse movement, so it doesnt pass a button, we have to manually set it
-  function paint(e, clickOverride = false) {
-
-    if ((window.event.buttons !== 0 || clickOverride) && !running) {
-      // big math to figure out which cell the mouse is over
-      var col = Math.floor((e.clientX - ((window.innerWidth - document.getElementById('grid').offsetWidth) / 2)) / document.getElementsByClassName('row')[0].childNodes[0].offsetWidth)
-      var row = Math.floor((e.clientY - 90) / boxSize)
-
-      var element = document.getElementById('row' + row + 'col' + col)
-      if (!element) {
-        return
-      }
-
-      // check to see if start and end exist, and if not and left clicking place them
-      if (document.getElementsByClassName('start').length === 0 && (window.event.buttons === 1 || clickOverride)) {
-        document.getElementById('row' + row + 'col' + col).classList.add('start')
-        return
-      }
-      if (document.getElementsByClassName('end').length === 0 && (window.event.buttons === 1 || clickOverride)) {
-        var endNode = document.getElementById('row' + row + 'col' + col)
-        if (endNode.classList.contains('start')) {
-          return
-        }
-        endNode.classList.add('end')
-        return
-      }
-
-      // paint the boxes when clicked, including the ones inbetween cuz it doesnt fire enough
-      if (!lastClickedCoords) {
-        var currentRow = row
-        var currentCol = col
-      }
-      else {
-        currentRow = lastClickedCoords[0]
-        currentCol = lastClickedCoords[1]
-      }
-
-      do {
-        if (row > currentRow) {
-          currentRow += 1
-        }
-        else if (row < currentRow) {
-          currentRow -= 1
-        }
-        if (col > currentCol) {
-          currentCol += 1
-        }
-        else if (col < currentCol) {
-          currentCol -= 1
-        }
-
-        if (window.event.buttons === 1) {
-          var currBox = document.getElementById('row' + currentRow + 'col' + currentCol)
-          if (!(currBox.classList.contains('start') || currBox.classList.contains('end'))) {
-            currBox.classList.add('barrier')
-          }
-        }
-        else if (window.event.buttons === 2) {
-          document.getElementById('row' + currentRow + 'col' + currentCol).className = ''
-        }
-      } while (currentRow !== row || currentCol !== col);
-      lastClickedCoords = [row, col]
-    }
-    else {
-      lastClickedCoords = null
-    }
-  }
-
   function algorithmChange(e) {
     var algo = e.target.value
     document.getElementById('infoAboutAlgo').innerHTML = writeUps[algo]
@@ -509,8 +444,6 @@ export default function App() {
 
   // default cell size
   var boxSize = 20
-  // used to trace the mouse, as the events don't trigger fast enough for me :/
-  var lastClickedCoords = null
 
   var gridHeight = Math.floor((window.innerHeight - 90) / boxSize)
   var gridWidth = Math.floor((window.innerWidth) / boxSize)
@@ -520,7 +453,7 @@ export default function App() {
     for (let row = 0; row < gridHeight; row++) {
       grid.push([])
       for (let col = 0; col < gridWidth; col++) {
-        grid[row].push(<Box row={row} col={col} boxSize={boxSize} />)
+        grid[row].push(<Box row={row} col={col} boxSize={boxSize} startSet={startSet} endSet={endSet} setStartSet={setStartSet} setEndSet={setEndSet}/>)
       }
     }
     return (grid)
@@ -560,7 +493,7 @@ export default function App() {
       <div id='infoBar'>
         <p id='infoAboutAlgo'>AStar is <b>Weighted</b> and <b>Guarantees</b> the shortest path</p>
       </div>
-      <div id='grid' onMouseMove={e => paint(e)} onMouseDown={e => paint(e, true)}>
+      <div id='grid'>
         {getGrid().map((row, key) => {
           return (
             <div className='row' id={key}>
